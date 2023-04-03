@@ -21,10 +21,9 @@ pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_da
 python3 run_basic_du.py  \
   --output_dir $output_dir \
   --model_name_or_path  $init_dir \
-  --resume_from_checkpoint=/search/ai/jamsluo/passage_rank/du_task_output/tmp/checkpoint-4000/ \
   --passage_path $passage_path \
   --do_train \
-  --save_steps 300 \
+  --save_steps 50 \
   --train_dir $train_data_dir \
   --max_len 128 \
   --seed 66 \

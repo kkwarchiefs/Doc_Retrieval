@@ -162,8 +162,9 @@ class Reranker(nn.Module):
 
     def save_pretrained(self, output_dir: str):
         # self.hf_model.save_pretrained(output_dir)
+        path = os.path.join(output_dir, "pytorch_model.bin")
         model_to_save = self.module if hasattr(self, "module") else self
-        torch.save(model_to_save.state_dict(), output_dir)
+        torch.save(model_to_save.state_dict(), path)
 
     def dist_gather_tensor(self, t: Optional[torch.Tensor]):
         if t is None:
