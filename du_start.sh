@@ -15,11 +15,9 @@ env CUDA_VISIBLE_DEVICES=0
 
 output_dir=/search/ai/jamsluo/passage_rank/du_task_output/tmp
 init_dir=/search/ai/pretrain_models/chinese-roberta-wwm-ext-large/
-#init_dir=/cfs/cfs-i125txtf/jamsluo/paper_task_output/ernie_basic_rocketqa/checkpoint-108000
 passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train/
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev.res.top100
-#python3 -m torch.distributed.launch --nproc_per_node 1  run_basic.py \
 python3 run_basic_du.py  \
   --output_dir $output_dir \
   --model_name_or_path  $init_dir \
@@ -28,12 +26,12 @@ python3 run_basic_du.py  \
   --do_train \
   --save_steps 4000 \
   --train_dir $train_data_dir \
-  --max_len 384 \
+  --max_len 128 \
   --seed 66 \
   --fp16 \
   --adafactor \
   --per_device_train_batch_size 2 \
-  --train_group_size 10 \
+  --train_group_size 3 \
   --per_device_eval_batch_size 64 \
   --warmup_ratio 0.1 \
   --weight_decay 0.01 \

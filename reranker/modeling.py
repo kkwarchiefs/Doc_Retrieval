@@ -26,6 +26,7 @@ from typing import Dict, List, Tuple, Iterable
 from torch import Tensor
 
 # from einops.layers.torch import Rearrange
+from transformers import TrainingArguments, Trainer, BertTokenizer, BertModel, BertPreTrainedModel
 
 logger = logging.getLogger(__name__)
 from transformers.models.bert.modeling_bert import BertAttention
@@ -172,7 +173,6 @@ class Reranker(nn.Module):
         all_tensors = torch.cat(all_tensors, dim=0)
 
         return all_tensors
-
 
 class RerankerEvent(nn.Module):
     def __init__(self, hf_model: PreTrainedModel, model_args: ModelArguments, data_args: DataArguments,
