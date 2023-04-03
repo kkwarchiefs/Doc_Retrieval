@@ -33,7 +33,7 @@ python3 run_basic_du.py  \
   --fp16 \
   --adafactor \
   --per_device_train_batch_size 2 \
-  --train_group_size 40 \
+  --train_group_size 10 \
   --per_device_eval_batch_size 64 \
   --warmup_ratio 0.1 \
   --weight_decay 0.01 \
