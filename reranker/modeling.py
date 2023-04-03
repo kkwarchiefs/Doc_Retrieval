@@ -161,7 +161,9 @@ class Reranker(nn.Module):
         return reranker
 
     def save_pretrained(self, output_dir: str):
-        self.hf_model.save_pretrained(output_dir)
+        # self.hf_model.save_pretrained(output_dir)
+        model_to_save = self.module if hasattr(self, "module") else self
+        torch.save(model_to_save.state_dict(), output_dir)
 
     def dist_gather_tensor(self, t: Optional[torch.Tensor]):
         if t is None:
