@@ -256,15 +256,12 @@ class RetrieverQA(nn.Module):
 
         qry_cls = qry_out.last_hidden_state[:, 0]
         doc_cls = doc_out.last_hidden_state[:, 0]
-        doc_reps = doc_cls.contiguous().view(
-            -1,
-            group_size,
-            self.config.hidden_size,
-        )
+
         if not self.training:
-            score_ir = torch.sum(qry_cls.unsqueeze(1) * doc_reps, dim=-1)
+            score_ir = torch.sum(qry_cls * doc_cls, dim=-1)
             return score_ir
         else:
+
             scores = torch.matmul(qry_cls, doc_cls.transpose(1, 0))  # Q * D
             index = torch.arange(
                 scores.size(0),
