@@ -15,6 +15,7 @@ from transformers import PreTrainedTokenizer, BatchEncoding
 import json
 
 from .arguments import DataArguments, RerankerTrainingArguments
+import pickle
 
 class RetrivalTrainDataset(Dataset):
     query_columns = ['qid', 'query']
@@ -86,6 +87,109 @@ class RetrivalTrainDataset(Dataset):
             item['label'] = idx
             group_batch.append(item)
         return encoded_query, group_batch
+
+class GroupedTrainQA(Dataset):
+    def __init__(
+            self,
+            args: DataArguments,
+            path_to_tsv: Union[List[str], str],
+            tokenizer: PreTrainedTokenizer,
+            train_args: RerankerTrainingArguments = None,
+    ):
+        self.nlp_dataset = datasets.load_dataset(
+            'json',
+            data_files=path_to_tsv,
+        )['train']
+
+        self.tok = tokenizer
+        self.SEP = [self.tok.sep_token_id]
+        self.args = args
+        self.total_len = len(self.nlp_dataset)
+        self.train_args = train_args
+        # with open(args.passage_path + '/passage2id.map.json', "r") as fr:
+        #     self.pcid2pid = json.load(fr)
+        # self.idx2txt = self.read_part(args.passage_path)
+        self.idx2txt = pickle.load(open(args.passage_path, 'rb'))
+
+    def read_part(self, passage_path):
+        qid2txt = []
+        for i in range(4):
+            for line in open(passage_path + '/part-0' + str(i), 'r', encoding='utf-8'):
+                items = line.strip().split('\t')
+                qid2txt.append(items[2])
+        return qid2txt
+
+    def __len__(self):
+        return self.total_len
+
+    def create_one_example(self, doc_encoding: str):
+        item = self.tok.encode_plus(
+            doc_encoding,
+            truncation=True,
+            max_length=self.args.max_len,
+            padding=False,
+        )
+        return item
+
+    def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
+        group = self.nlp_dataset[item]
+        qtext = group['qry']
+        pos_pid = random.choice(group['pos'])
+        # select  = self.nlp_dataset[random.randint(0, self.__len__())]
+        neg_group = group['neg'] #+ select['neg'][:3]
+        if len(neg_group) < self.args.train_group_size:
+            negs = random.choices(neg_group, k=self.args.train_group_size)
+        else:
+            negs = random.sample(neg_group, k=self.args.train_group_size)
+        negs[0] = pos_pid
+        group_batch = []
+        encoded_query = self.create_one_example(qtext)
+        for neg_id in negs:
+            psg = self.idx2txt[int(neg_id)]
+            group_batch.append(self.create_one_example(psg))
+        return encoded_query, group_batch
+
+class PredictionQA(Dataset):
+    columns = [
+        'qid', 'pid', 'qry', 'psg'
+    ]
+
+    def __init__(self, args: DataArguments, path_to_json: List[str], tokenizer: PreTrainedTokenizer, max_len=128):
+        self.nlp_dataset = datasets.load_dataset(
+            'text',
+            data_files=path_to_json,
+        )['train']
+        self.tok = tokenizer
+        self.max_len = max_len
+        self.args = args
+        # self.idx2txt = self.read_part(args.passage_path)
+        self.idx2txt = pickle.load(open(args.passage_path, 'rb'))
+
+    def read_part(self, passage_path):
+        qid2txt = []
+        for i in range(4):
+            for line in open(passage_path + '/part-0' + str(i), 'r', encoding='utf-8'):
+                items = line.strip().split('\t')
+                qid2txt.append(items[2])
+        return qid2txt
+
+    def __len__(self):
+        return len(self.nlp_dataset)
+
+    def create_one_example(self, doc_encoding: str):
+        item = self.tok.encode_plus(
+            doc_encoding,
+            truncation=True,
+            max_length=self.args.max_len,
+            padding=False,
+        )
+        return item
+
+    def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
+        group = self.nlp_dataset[item]['text'].split('\t')
+        qtext = group[0]
+        neg_id = group[1]
+        return self.create_one_example(qtext), self.create_one_example(self.idx2txt[int(neg_id)])
 
 class RetrivalPredictionDataset(Dataset):
     columns = [
