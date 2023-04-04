@@ -154,13 +154,14 @@ class PredictionQA(Dataset):
         'qid', 'pid', 'qry', 'psg'
     ]
 
-    def __init__(self, args: DataArguments, path_to_json: List[str], tokenizer: PreTrainedTokenizer, max_len=128):
+    def __init__(self, args: DataArguments, path_to_json: List[str], tokenizer: PreTrainedTokenizer, q_max_len=32, p_max_len=128):
         self.nlp_dataset = datasets.load_dataset(
             'text',
             data_files=path_to_json,
         )['train']
         self.tok = tokenizer
-        self.max_len = max_len
+        self.q_max_len = q_max_len
+        self.p_max_len = p_max_len
         self.args = args
         # self.idx2txt = self.read_part(args.passage_path)
         self.idx2txt = pickle.load(open(args.passage_path, 'rb'))
@@ -176,11 +177,11 @@ class PredictionQA(Dataset):
     def __len__(self):
         return len(self.nlp_dataset)
 
-    def create_one_example(self, doc_encoding: str):
+    def create_one_example(self, doc_encoding: str, max_len: int):
         item = self.tok.encode_plus(
             doc_encoding,
             truncation=True,
-            max_length=self.args.max_len,
+            max_length=max_len,
             padding=False,
         )
         return item
@@ -189,7 +190,7 @@ class PredictionQA(Dataset):
         group = self.nlp_dataset[item]['text'].split('\t')
         qtext = group[0]
         neg_id = group[1]
-        return self.create_one_example(qtext), self.create_one_example(self.idx2txt[int(neg_id)])
+        return self.create_one_example(qtext, self.q_max_len), self.create_one_example(self.idx2txt[int(neg_id)],self.p_max_len)
 
 class RetrivalPredictionDataset(Dataset):
     columns = [
