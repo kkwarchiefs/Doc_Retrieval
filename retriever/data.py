@@ -122,11 +122,11 @@ class GroupedTrainQA(Dataset):
     def __len__(self):
         return self.total_len
 
-    def create_one_example(self, doc_encoding: str):
+    def create_one_example(self, doc_encoding: str, max_len:int):
         item = self.tok.encode_plus(
             doc_encoding,
             truncation=True,
-            max_length=self.args.max_len,
+            max_length=max_len,
             padding=False,
         )
         return item
@@ -143,10 +143,10 @@ class GroupedTrainQA(Dataset):
             negs = random.sample(neg_group, k=self.args.train_group_size)
         negs[0] = pos_pid
         group_batch = []
-        encoded_query = self.create_one_example(qtext)
+        encoded_query = self.create_one_example(qtext, self.args.q_max_len)
         for neg_id in negs:
             psg = self.idx2txt[int(neg_id)]
-            group_batch.append(self.create_one_example(psg))
+            group_batch.append(self.create_one_example(psg, self.args.q_max_len))
         return encoded_query, group_batch
 
 class PredictionQA(Dataset):
@@ -190,7 +190,7 @@ class PredictionQA(Dataset):
         group = self.nlp_dataset[item]['text'].split('\t')
         qtext = group[0]
         neg_id = group[1]
-        return self.create_one_example(qtext, self.q_max_len), self.create_one_example(self.idx2txt[int(neg_id)],self.p_max_len)
+        return self.create_one_example(qtext, self.q_max_len), self.create_one_example(self.idx2txt[int(neg_id)], self.p_max_len)
 
 class RetrivalPredictionDataset(Dataset):
     columns = [
