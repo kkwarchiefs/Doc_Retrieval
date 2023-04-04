@@ -49,7 +49,7 @@ output_dir=/search/ai/jamsluo/passage_rank/du_task_output/tmp4
 init_dir=/search/ai/pretrain_models/chinese-roberta-wwm-ext-large/
 passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train/
-pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev.res.top100
+pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev.res.top4
 env CUDA_VISIBLE_DEVICES=0 python3 retrival_du.py \
   --output_dir $output_dir \
   --model_name_or_path  $init_dir \
@@ -72,7 +72,8 @@ env CUDA_VISIBLE_DEVICES=0 python3 retrival_du.py \
   --dataloader_num_workers 16 \
   --evaluation_strategy steps \
   --eval_steps 100 \
-  --pred_path $pred_path
+  --pred_path $pred_path \
+  --use_legacy_prediction_loop
 
 output_dir=/cfs/cfs-i125txtf/jamsluo/du_task_output/tmp
 init_dir=/cfs/cfs-i125txtf/jamsluo/dataset/pretrained_models/chinese-electra-180g-large-discriminator/
