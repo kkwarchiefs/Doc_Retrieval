@@ -44,13 +44,13 @@ python3 run_basic_du.py  \
   --eval_steps 4000 \
   --pred_path $pred_path
 
-
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/tmp4
+export CUDA_LAUNCH_BLOCKING=1
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/roberta_large_g9_1e5
 init_dir=/search/ai/pretrain_models/chinese-roberta-wwm-ext-large/
 passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train/
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev.res.top4
-env CUDA_VISIBLE_DEVICES=0 python3 retrival_du.py \
+python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --output_dir $output_dir \
   --model_name_or_path  $init_dir \
   --passage_path $passage_path \
@@ -61,17 +61,17 @@ env CUDA_VISIBLE_DEVICES=0 python3 retrival_du.py \
   --q_max_len 128 \
   --p_max_len 512 \
   --seed 66 \
-  --per_device_train_batch_size 2 \
-  --train_group_size 10 \
+  --per_device_train_batch_size 4 \
+  --train_group_size 9 \
   --per_device_eval_batch_size 32 \
   --warmup_ratio 0.1 \
   --weight_decay 0.01 \
   --learning_rate 1e-5 \
   --num_train_epochs 5 \
   --overwrite_output_dir \
-  --dataloader_num_workers 16 \
+  --dataloader_num_workers 3 \
   --evaluation_strategy steps \
-  --eval_steps 100 \
+  --eval_steps 500 \
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 

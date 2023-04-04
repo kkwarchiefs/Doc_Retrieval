@@ -32,8 +32,8 @@ class QryDocCollator(DataCollatorWithPadding):
     and pass batch separately to the actual collator.
     Abstract out data detail for the model.
     """
-    max_q_len: int = 24
-    max_d_len: int = 192
+    max_q_len: int = 128
+    max_d_len: int = 512
 
     def __call__(
             self, features
