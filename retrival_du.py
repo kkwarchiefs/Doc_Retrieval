@@ -134,7 +134,6 @@ def main():
     def formate_output(pred_scores, outfile):
         pred_qids = []
         pred_pids = []
-        score_split = data_args.train_group_size
         with open(data_args.pred_path[0], 'r', encoding='utf-8') as f:
             for l in f:
                 q, p = l.split('\t')[:2]
@@ -153,7 +152,8 @@ def main():
                 for qid in qq:
                     score_list = sorted(list(all_scores[qid].items()), key=lambda x: x[1], reverse=True)
                     for rank, (did, score) in enumerate(score_list):
-                        writer.write(f'{qid}\t{did}\t{rank + 1}\t{score}\n')
+                        res_doc = eval_dataset.idx2txt[did]
+                        writer.write(f'{qid}\t{did}\t{res_doc}\t{rank + 1}\t{score}\n')
 
     if training_args.do_train and data_args.pred_path is not None:
         train_dataset = _train_class(

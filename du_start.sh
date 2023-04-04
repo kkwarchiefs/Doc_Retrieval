@@ -71,7 +71,7 @@ env CUDA_VISIBLE_DEVICES=0 python3 retrival_du.py \
   --overwrite_output_dir \
   --dataloader_num_workers 16 \
   --evaluation_strategy steps \
-  --eval_steps 500 \
+  --eval_steps 100 \
   --pred_path $pred_path
 
 output_dir=/cfs/cfs-i125txtf/jamsluo/du_task_output/tmp
