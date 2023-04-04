@@ -136,7 +136,7 @@ def main():
         pred_pids = []
         with open(data_args.pred_path[0], 'r', encoding='utf-8') as f:
             for l in f:
-                q, p = l.split('\t')[:2]
+                q, p = l.strip().split('\t')[:2]
                 pred_qids.append(q)
                 pred_pids.append(p)
         if trainer.is_world_process_zero():
