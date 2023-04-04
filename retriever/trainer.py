@@ -208,4 +208,4 @@ class RerankerRetrival(Trainer):
         #     if not key.startswith("eval_"):
         #         metrics_no_label[f"eval_{key}"] = metrics_no_label.pop(key)
 
-        return EvalLoopOutput(predictions=preds, label_ids=label_ids, metrics={**metrics, **metrics_no_label}, num_samples=preds.size(0))
+        return EvalLoopOutput(predictions=preds, label_ids=label_ids, metrics={**metrics, **metrics_no_label}, num_samples=preds.shape[0])
