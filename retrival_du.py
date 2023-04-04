@@ -152,7 +152,7 @@ def main():
                 for qid in qq:
                     score_list = sorted(list(all_scores[qid].items()), key=lambda x: x[1], reverse=True)
                     for rank, (did, score) in enumerate(score_list):
-                        res_doc = eval_dataset.idx2txt[int(did)]
+                        res_doc = eval_dataset.idx2txt[int(did)].strip()
                         writer.write(f'{qid}\t{did}\t{res_doc}\t{rank + 1}\t{score}\n')
 
     if training_args.do_train and data_args.pred_path is not None:

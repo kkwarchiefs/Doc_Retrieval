@@ -124,7 +124,7 @@ class GroupedTrainQA(Dataset):
 
     def create_one_example(self, doc_encoding: str, max_len:int):
         item = self.tok.encode_plus(
-            doc_encoding,
+            doc_encoding.strip(),
             truncation=True,
             max_length=max_len,
             padding=False,
@@ -179,7 +179,7 @@ class PredictionQA(Dataset):
 
     def create_one_example(self, doc_encoding: str, max_len: int):
         item = self.tok.encode_plus(
-            doc_encoding,
+            doc_encoding.strip(),
             truncation=True,
             max_length=max_len,
             padding=False,
