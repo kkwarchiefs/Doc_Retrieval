@@ -188,17 +188,7 @@ def main():
                 max_d_len=data_args.p_max_len),
         )
     else:
-        train_dataset = None
-        trainer = _trainer_class(
-            model=model,
-            args=training_args,
-            tokenizer=tokenizer,
-            train_dataset=train_dataset,
-            data_collator=QryDocCollator(
-                tokenizer,
-                max_q_len=data_args.q_max_len,
-                max_d_len=data_args.p_max_len),
-        )
+        pass
 
     if training_args.do_train and trainer.is_world_process_zero():
         print(config)
@@ -233,6 +223,18 @@ def main():
             tokenizer.save_pretrained(training_args.output_dir)
 
     if training_args.do_eval:
+        train_dataset = None
+        trainer = _trainer_class(
+            model=model,
+            args=training_args,
+            tokenizer=tokenizer,
+            train_dataset=train_dataset,
+            eval_dataset=eval_dataset,
+            data_collator=QryDocCollator(
+                tokenizer,
+                max_q_len=data_args.q_max_len,
+                max_d_len=data_args.p_max_len),
+        )
         trainer.evaluate()
 
     if training_args.do_encode:

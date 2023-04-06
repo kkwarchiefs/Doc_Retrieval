@@ -75,6 +75,68 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 
+export CUDA_LAUNCH_BLOCKING=1
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/temp
+init_dir=/search/ai/jamsluo/passage_rank/du_task_output/roberta_large_g9_1e5/checkpoint-9000/
+passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
+train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train/
+pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev.res.top10
+python3 -m torch.distributed.launch --nproc_per_node 4 retrival_du.py \
+  --output_dir $output_dir \
+  --model_name_or_path  $init_dir \
+  --passage_path $passage_path \
+  --logging_steps 50 \
+  --do_eval \
+  --save_steps 1000 \
+  --train_dir $train_data_dir \
+  --q_max_len 128 \
+  --p_max_len 512 \
+  --seed 66 \
+  --per_device_train_batch_size 4 \
+  --train_group_size 9 \
+  --per_device_eval_batch_size 32 \
+  --warmup_ratio 0.1 \
+  --weight_decay 0.01 \
+  --learning_rate 1e-5 \
+  --num_train_epochs 5 \
+  --overwrite_output_dir \
+  --dataloader_num_workers 3 \
+  --evaluation_strategy steps \
+  --eval_steps 500 \
+  --pred_path $pred_path \
+  --use_legacy_prediction_loop
+
+export CUDA_LAUNCH_BLOCKING=1
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g18_4e5
+init_dir=/search/ai/pretrain_models/models--nghuyong--ernie-3.0-base-zh/
+passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
+train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train/
+pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev.res.top10
+python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
+  --output_dir $output_dir \
+  --model_name_or_path  $init_dir \
+  --passage_path $passage_path \
+  --logging_steps 50 \
+  --do_train \
+  --save_steps 1000 \
+  --train_dir $train_data_dir \
+  --q_max_len 128 \
+  --p_max_len 512 \
+  --seed 66 \
+  --per_device_train_batch_size 4 \
+  --train_group_size 18 \
+  --per_device_eval_batch_size 32 \
+  --warmup_ratio 0.1 \
+  --weight_decay 0.01 \
+  --learning_rate 4e-5 \
+  --num_train_epochs 8 \
+  --overwrite_output_dir \
+  --dataloader_num_workers 3 \
+  --evaluation_strategy steps \
+  --eval_steps 500 \
+  --pred_path $pred_path \
+  --use_legacy_prediction_loop
+
 output_dir=/cfs/cfs-i125txtf/jamsluo/du_task_output/tmp
 init_dir=/cfs/cfs-i125txtf/jamsluo/dataset/pretrained_models/chinese-electra-180g-large-discriminator/
 passage_path=/cfs/cfs-i125txtf/jamsluo/du_retrival_exp/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
