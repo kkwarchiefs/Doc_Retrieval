@@ -230,8 +230,8 @@ def main():
             model=model,
             args=training_args,
             tokenizer=tokenizer,
-            train_dataset=train_dataset,
             eval_dataset=eval_dataset,
+            compute_metrics=compute_metrics,
             data_collator=QryDocCollator(
                 tokenizer,
                 max_q_len=data_args.q_max_len,
