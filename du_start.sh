@@ -107,7 +107,7 @@ python3 -m torch.distributed.launch --nproc_per_node 4 retrival_du.py \
   --use_legacy_prediction_loop
 
 export CUDA_LAUNCH_BLOCKING=1
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g2_5e5_third
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g2_5e5_long
 init_dir=/search/ai/pretrain_models/models--nghuyong--ernie-3.0-base-zh/
 passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train/
@@ -137,12 +137,12 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g2_5e5_dureader_train
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g2_5e5_dureader_train_sec
 init_dir=/search/ai/pretrain_models/models--nghuyong--ernie-3.0-base-zh/
 passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/dureader-retrieval-baseline-dataset/train_dual/
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev.res.top10
-python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
+python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du_line.py \
   --output_dir $output_dir \
   --model_name_or_path  $init_dir \
   --passage_path $passage_path \
@@ -159,7 +159,7 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --warmup_ratio 0.1 \
   --weight_decay 0.01 \
   --learning_rate 5e-5 \
-  --num_train_epochs 8 \
+  --num_train_epochs 10 \
   --overwrite_output_dir \
   --dataloader_num_workers 8 \
   --evaluation_strategy steps \
