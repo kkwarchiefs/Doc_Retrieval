@@ -23,17 +23,5 @@ def read_model():
     model_dict = torch.load(os.path.join(RM_model_path, 'pytorch_model.bin'), map_location="cpu")
     print([k for k, v in model_dict.items()])
 
-def covert_onnx():
-    from onnx import load_model, save_model
-    import torch
-    import torch.nn as nn
-    from onnxmltools.utils import float16_converter
-    import numpy as np
-    path = sys.argv[1]
-    out = sys.argv[2]
-    onnx_model = load_model(path + '/model.onnx')
-    new_onnx_model = float16_converter.convert_float_to_float16(onnx_model, keep_io_types=True)
-    save_model(new_onnx_model, out + '/model_fp16.onnx')
-
 if __name__ == "__main__":
     convert_model()
