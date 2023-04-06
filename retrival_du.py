@@ -114,7 +114,7 @@ def main():
 
     _model_class = RetrieverQA  # COILSentence
     _trainer_class = RerankerRetrival
-    _train_class = GroupedTrainQA
+    _train_class = GroupedTrainLine #GroupedTrainQA
     _eval_class = PredictionQA
     _test_class = PredictionQA
     model = _model_class.from_pretrained(

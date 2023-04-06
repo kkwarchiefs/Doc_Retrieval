@@ -107,7 +107,7 @@ python3 -m torch.distributed.launch --nproc_per_node 4 retrival_du.py \
   --use_legacy_prediction_loop
 
 export CUDA_LAUNCH_BLOCKING=1
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g49_5e5
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g2_5e5_sec
 init_dir=/search/ai/pretrain_models/models--nghuyong--ernie-3.0-base-zh/
 passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train/
@@ -118,18 +118,18 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --passage_path $passage_path \
   --logging_steps 50 \
   --do_train \
-  --save_steps 2000 \
+  --save_steps 1000 \
   --train_dir $train_data_dir \
-  --q_max_len 64 \
-  --p_max_len 256 \
+  --q_max_len 32 \
+  --p_max_len 384 \
   --seed 66 \
-  --per_device_train_batch_size 2 \
-  --train_group_size 49 \
-  --per_device_eval_batch_size 32 \
+  --per_device_train_batch_size 64 \
+  --train_group_size 2 \
+  --per_device_eval_batch_size 128 \
   --warmup_ratio 0.1 \
   --weight_decay 0.01 \
   --learning_rate 5e-5 \
-  --num_train_epochs 5 \
+  --num_train_epochs 15 \
   --overwrite_output_dir \
   --dataloader_num_workers 3 \
   --evaluation_strategy steps \

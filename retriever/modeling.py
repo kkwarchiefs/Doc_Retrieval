@@ -221,9 +221,6 @@ class RetrieverQA(nn.Module):
         self.model: PreTrainedModel = model
         self.cross_entropy = nn.CrossEntropyLoss(reduction='mean')
         self.data_args, self.model_args, self.train_args = data_args, model_args, train_args
-        self.config = config
-        self.trams_layer = BertAttention(config)
-        self.mlp = nn.Linear(config.hidden_size, 1)
 
     @classmethod
     def from_pretrained(

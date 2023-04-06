@@ -5,7 +5,7 @@ from string import Template
 import torch
 from huggingface_hub import snapshot_download
 from torch import nn
-from transformers import AutoConfig, AutoModel
+from transformers import AutoConfig, AutoModel,AutoTokenizer
 from transformers import BertTokenizer
 parser = argparse.ArgumentParser()
 
@@ -26,18 +26,20 @@ class RetrieverInfer(nn.Module):
         model = cls(hf_model)
         return model
 
-    def forward(self, doc_input):
-        doc_input['input_ids'] = doc_input['input_ids'].to(self.model.device)
-        if 'token_type_ids' in doc_input:
-            doc_input['token_type_ids'] = doc_input['token_type_ids'].to(self.model.device)
-        doc_input['attention_mask'] = doc_input['attention_mask'].to(self.model.device)
+    def forward(self, input_ids, token_type_ids, attention_mask):
+        doc_input = {}
+        doc_input['input_ids'] = input_ids.to(self.model.device)
+        doc_input['token_type_ids'] = token_type_ids.to(self.model.device)
+        doc_input['attention_mask'] = attention_mask.to(self.model.device)
         doc_out = self.model(**doc_input, return_dict=True)
         return doc_out.last_hidden_state[:, 0]
 
 
-RM_model_path = "/search/ai/jamsluo/passage_rank/du_task_output/roberta_large_g9_1e5/checkpoint-9000"
+RM_model_path = "/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g49_5e5/checkpoint-16000/"
+RM_model_path = "/search/ai/pretrain_models/Dense-bert_base-contrast-dureader/"
+RM_model_path = "/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g2_5e5_sec"
 
-RM_tokenizer = BertTokenizer.from_pretrained(RM_model_path, trust_remote_code=True)
+RM_tokenizer = AutoTokenizer.from_pretrained(RM_model_path, trust_remote_code=True)
 config = AutoConfig.from_pretrained(
 		RM_model_path,
         trust_remote_code=True
@@ -48,9 +50,9 @@ RM_model = RetrieverInfer.from_pretrained(RM_model_path, config=config, trust_re
 # new_model_dict = {k.replace('hf_model.', ''): v for k, v in model_dict.items()}
 # load_result = RM_model.load_state_dict(new_model_dict, strict=True)
 
-RM_model = RM_model.half().to(device)
+RM_model = RM_model.to(device)
 response_text = '服用三七粉期间,孕妇和儿童不宜使用。 三七粉是处方药,不是药品。 过量服用会引起中毒。'
-temp_inputs = RM_tokenizer(response_text + response_text, max_length=512, truncation=True, return_tensors="pt").to(device)
+temp_inputs = RM_tokenizer(response_text, max_length=512, truncation=True, return_tensors="pt").to(device)
 print(temp_inputs)
 inputs = (temp_inputs['input_ids'], temp_inputs['token_type_ids'], temp_inputs['attention_mask'])  # 模型测试输入数据
 
@@ -60,7 +62,7 @@ os.makedirs(f"/search/ai/jamsluo/passage_rank/du_task_output/model_store/{model_
 torch.onnx.export(
 	RM_model,
 	inputs,
-	f"model_store/{model_name}/1/model.onnx",  # 输出模型文件名
+	f"/search/ai/jamsluo/passage_rank/du_task_output/model_store/{model_name}/1/model.onnx",  # 输出模型文件名
 	input_names=['input_ids', 'token_type_ids', 'attention_mask'],  # 输入节点名，每一个名称对应一个输入名
     output_names=['output'],  # 输出节点名，每一个名称对应一个输出名
 	opset_version=14,
