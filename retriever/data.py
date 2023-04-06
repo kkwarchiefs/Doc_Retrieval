@@ -131,6 +131,30 @@ class GroupedTrainQA(Dataset):
         )
         return item
 
+    def cut_words(self, psg):
+        idx = random.randint(0, 4)
+        if idx == 1:
+            return psg
+        elif idx == 2:
+            start = random.randint(0,3)
+            return psg[start:]
+        elif idx == 3:
+            end = random.randint(0, 3)
+            return psg[:-end]
+        elif idx == 4:
+            if len(psg) >= self.args.p_max_len:
+                return psg
+            newid = random.randint(0, self.total_len-10)
+            group = self.nlp_dataset[newid]
+            pos_pid = random.choice(group['pos'])
+            text = self.idx2txt[int(pos_pid)]
+            remain = self.args.p_max_len - len(psg)
+            if random.randint(0, 1) == 0:
+                psg = text[:remain] + psg
+            else:
+                psg = psg + text[:remain]
+            return psg
+
     def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
         group = self.nlp_dataset[item]
         qtext = group['qry']
@@ -146,7 +170,8 @@ class GroupedTrainQA(Dataset):
         encoded_query = self.create_one_example(qtext, self.args.q_max_len)
         for neg_id in negs:
             psg = self.idx2txt[int(neg_id)]
-            group_batch.append(self.create_one_example(psg, self.args.q_max_len))
+            psg = self.cut_words(psg)
+            group_batch.append(self.create_one_example(psg, self.args.p_max_len))
         return encoded_query, group_batch
 
 class GroupedTrainLine(Dataset):
@@ -188,7 +213,7 @@ class GroupedTrainLine(Dataset):
         encoded_query = self.create_one_example(qtext, self.args.q_max_len)
         assert len(group[2]) > 0  and len(group[4]) > 0
         for ptext in [group[2], group[4]]:
-            group_batch.append(self.create_one_example(ptext, self.args.q_max_len))
+            group_batch.append(self.create_one_example(ptext, self.args.p_max_len))
         return encoded_query, group_batch
 
 

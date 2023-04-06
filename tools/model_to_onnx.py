@@ -1,7 +1,7 @@
 import argparse
 import os
 from string import Template
-
+import sys
 import torch
 from huggingface_hub import snapshot_download
 from torch import nn
@@ -9,8 +9,8 @@ from transformers import AutoConfig, AutoModel,AutoTokenizer
 from transformers import BertTokenizer
 parser = argparse.ArgumentParser()
 
-parser.add_argument("--device", type=int, default=0)
-args = parser.parse_args()
+# parser.add_argument("--device", type=int, default=0)
+# args = parser.parse_args()
 
 model_name = "embedding_passage_onnx"
 device = torch.device('cuda:0')
@@ -37,7 +37,8 @@ class RetrieverInfer(nn.Module):
 
 RM_model_path = "/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g49_5e5/checkpoint-16000/"
 RM_model_path = "/search/ai/pretrain_models/Dense-bert_base-contrast-dureader/"
-RM_model_path = "/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g2_5e5_sec"
+RM_model_path = "/search/ai/jamsluo/passage_rank/du_task_output//ernie_base_g2_5e5_dureader_train/checkpoint-4000/"
+RM_model_path = sys.argv[1]
 
 RM_tokenizer = AutoTokenizer.from_pretrained(RM_model_path, trust_remote_code=True)
 config = AutoConfig.from_pretrained(

@@ -41,15 +41,78 @@ def get_embedding(doc):
     return results
     # print(results, sep='\t')
 
+def break_sentence(text: str):
+    # 转换成小写
+    text = text.lower()
+    ret = list()
 
+    # 长度较短，不进行分句
+    if len(text) < HALF_SENT_LEN:
+        ret.append(text)
+        return ret
+
+    # 按照标点分句
+    last_pos = 0
+    for i, c in enumerate(text):
+        if c in break_punctations and i - last_pos > MIN_SENT_LEN:
+            segment = text[last_pos:i]
+            if len(segment) > MAX_SENT_LEN:
+                # 需要再次分句
+                subs = force_break_sentence(segment)
+                ret.extend(subs)
+            else:
+                ret.append(segment)
+
+            # 分隔符
+            last_pos = i + 1
+
+    # 结尾仍有残余部分需要分句
+    if last_pos < len(text):
+        segment = text[last_pos:]
+        if len(segment) > MAX_SENT_LEN:
+            subs = force_break_sentence(segment)
+            ret.extend(subs)
+        else:
+            ret.append(segment)
+
+    return ret
+
+PUNCT = 'w'
+
+break_punctations = {'！', '？', '!', '?', '。'}
+force_break_punctations = {',', ';', '，', '；'}
+MAX_SENT_LEN = 512
+HALF_SENT_LEN = 512
+MIN_SENT_LEN = 256
+# 按照小标点或长度强制分句
+def force_break_sentence(text: str):
+    ret = list()
+
+    # 已经满足要求
+    if len(text) <= MAX_SENT_LEN:
+        ret.append(text)
+        return ret
+
+    idx = MAX_SENT_LEN - 1
+    while idx >= 0 and text[idx] not in force_break_punctations:
+        idx -= 1
+
+    break_idx = idx + 1 if idx >= 0 else MAX_SENT_LEN
+    ret.append(text[:break_idx])
+
+    # 剩余部分
+    remains = text[break_idx:]
+    ret.extend(force_break_sentence(remains))
+    return ret
 
 if __name__ == '__main__':
-    # docs = ' '.join(open(sys.argv[1]).readlines())
     # step = docs.split('。')
     # parts = [step[i] for i in range(len(step))][:128]
     docs = ' '.join(open(sys.argv[1]).readlines())
-    step = len(docs) // 256
-    parts = [docs[i*256:(i+2)*256] for i in range(step)]
+    parts = break_sentence(docs)
+    # docs = ' '.join(open(sys.argv[1]).readlines())
+    # step = len(docs) // 500
+    # parts = [docs[i*500:(i+1)*500] for i in range(step)]
     # parts = ["导读：对于假日我们总是很期待，尤其是法定假日，法定节假日是指根据各国、各民族的风俗习惯或纪念要求，由国家法律统一规定的用以进行庆祝及度假的休息时间。那么，2016中国法定节假日一年共有多少天?2016全年法定节假日多少天?快点随万年历小编详细了解下中国法定节假日多少天吧。什么是法定假日法定节假日是指根据各国、各民族的风俗习惯或纪念要求，由国家法律统一规定的用以进行庆祝及度假的休息时间。法定节假日制度是国家政治、经济、文化制度的重要反映，涉及经济社会的多个方面，涉及广大人民群众的切身利益。2016中国法定节假日共有多少天",
     #          "一年国家法定节假日为11天。根据公布的国家法定节假日调整方案，调整的主要内容包括：元旦放假1天不变；春节放假3天，放假时间为农历正月初一、初二、初三；“五一”国际劳动节1天不变；“十一”国庆节放假3天；清明节、端午节、中秋节增设为国家法定节假日，各放假1天(农历节日如遇闰月，以第一个月为休假日)。3、允许周末上移下错，与法定节假日形成连休。",
     #          "我国制定的法定节假日都是在规定的时间之内,要求用人单位给员工带薪休假的。不过如果不休假的话,按时的支付加班费也可以。法定节假日肯定是在规定的时间之内放假的,我国每年的法定节假日总体算起来也是相当长的一段时间。那么按照我国的规定,国家法定假日一年多少天呢?一、国家法定假日一年多少天?一年中法定假日包括周六周日一共有115天或116天。计算方法:我国共有法定节假日11天(包括春节、国庆两个假期各3天,元旦、清明、五",
@@ -64,7 +127,7 @@ if __name__ == '__main__':
             break
         # texts = raw_text.split('|')
         raw_embed = get_embedding(raw_text)
-        scores = np.sum(raw_embed * embed, axis=-1)
+        scores = np.matmul(raw_embed, embed.transpose(1, 0))[0]
         sortid = np.argsort(-scores)
         for id in sortid[:5]:
             print(parts[id], scores[id])

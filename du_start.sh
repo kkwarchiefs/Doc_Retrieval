@@ -107,7 +107,7 @@ python3 -m torch.distributed.launch --nproc_per_node 4 retrival_du.py \
   --use_legacy_prediction_loop
 
 export CUDA_LAUNCH_BLOCKING=1
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g2_5e5_sec
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g2_5e5_third
 init_dir=/search/ai/pretrain_models/models--nghuyong--ernie-3.0-base-zh/
 passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train/
@@ -129,7 +129,7 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --warmup_ratio 0.1 \
   --weight_decay 0.01 \
   --learning_rate 5e-5 \
-  --num_train_epochs 15 \
+  --num_train_epochs 50 \
   --overwrite_output_dir \
   --dataloader_num_workers 3 \
   --evaluation_strategy steps \
