@@ -21,8 +21,9 @@ class RetrieverInfer(nn.Module):
         self.model = model
 
     @classmethod
-    def from_pretrained(*args, **kwargs):
-        model = AutoModel.from_pretrained(*args, **kwargs)
+    def from_pretrained(cls, *args, **kwargs):
+        hf_model = AutoModel.from_pretrained(*args, **kwargs)
+        model = cls(hf_model)
         return model
 
     def forward(self, doc_input):
@@ -49,8 +50,10 @@ RM_model = RetrieverInfer.from_pretrained(RM_model_path, config=config, trust_re
 
 RM_model = RM_model.half().to(device)
 response_text = '服用三七粉期间,孕妇和儿童不宜使用。 三七粉是处方药,不是药品。 过量服用会引起中毒。'
-inputs = RM_tokenizer(response_text + response_text, max_length=512, truncation=True, return_tensors="pt").to(device)
-print(inputs)
+temp_inputs = RM_tokenizer(response_text + response_text, max_length=512, truncation=True, return_tensors="pt").to(device)
+print(temp_inputs)
+inputs = (temp_inputs['input_ids'], temp_inputs['token_type_ids'], temp_inputs['attention_mask'])  # 模型测试输入数据
+
 # print(RM_model(input['input_ids'], input['attention_mask']))
 RM_model = RM_model.eval()  # 转换为eval模式
 os.makedirs(f"/search/ai/jamsluo/passage_rank/du_task_output/model_store/{model_name}/1", exist_ok=True)
