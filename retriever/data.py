@@ -132,6 +132,13 @@ class GroupedTrainQA(Dataset):
         return item
 
     def cut_words(self, psg):
+        if len(psg) >= self.args.p_max_len:
+            return psg
+        newid = random.randint(0, self.total_len - 10)
+        group = self.nlp_dataset[newid]
+        pos_pid = random.choice(group['pos'])
+        text = self.idx2txt[int(pos_pid)]
+        remain = self.args.p_max_len - len(psg)
         idx = random.randint(1, 4)
         if idx == 1:
             return psg
@@ -139,16 +146,10 @@ class GroupedTrainQA(Dataset):
             start = random.randint(0,3)
             return psg[start:]
         elif idx == 3:
-            end = random.randint(0, 3)
-            return psg[:-end]
+            start = random.randint(0,20)
+            psg = text[start:remain+start] + psg
+            return psg
         elif idx == 4:
-            if len(psg) >= self.args.p_max_len:
-                return psg
-            newid = random.randint(0, self.total_len-10)
-            group = self.nlp_dataset[newid]
-            pos_pid = random.choice(group['pos'])
-            text = self.idx2txt[int(pos_pid)]
-            remain = self.args.p_max_len - len(psg)
             if random.randint(0, 1) == 0:
                 psg = text[:remain] + psg
             else:

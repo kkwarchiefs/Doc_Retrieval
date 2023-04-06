@@ -67,7 +67,7 @@ class DataArguments:
         },
     )
     p_max_len: int = field(
-        default=32,
+        default=512,
         metadata={
             "help": "The maximum total input sequence length after tokenization for passage. Sequences longer "
                     "than this will be truncated, sequences shorter will be padded."

@@ -131,7 +131,7 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --learning_rate 5e-5 \
   --num_train_epochs 50 \
   --overwrite_output_dir \
-  --dataloader_num_workers 3 \
+  --dataloader_num_workers 6 \
   --evaluation_strategy steps \
   --eval_steps 200 \
   --pred_path $pred_path \
