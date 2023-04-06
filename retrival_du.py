@@ -224,6 +224,8 @@ def main():
 
     if training_args.do_eval:
         train_dataset = None
+        eval_dataset = _eval_class(
+            data_args, data_args.pred_path, tokenizer=tokenizer, q_max_len=data_args.q_max_len, p_max_len=data_args.p_max_len)
         trainer = _trainer_class(
             model=model,
             args=training_args,
