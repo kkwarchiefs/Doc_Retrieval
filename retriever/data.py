@@ -186,7 +186,8 @@ class GroupedTrainLine(Dataset):
         qtext = group[0]
         group_batch = []
         encoded_query = self.create_one_example(qtext, self.args.q_max_len)
-        for ptext in [group[1], group[2]]:
+        assert len(group[2]) > 0  and len(group[4]) > 0
+        for ptext in [group[2], group[4]]:
             group_batch.append(self.create_one_example(ptext, self.args.q_max_len))
         return encoded_query, group_batch
 
