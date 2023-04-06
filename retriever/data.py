@@ -132,7 +132,7 @@ class GroupedTrainQA(Dataset):
         return item
 
     def cut_words(self, psg):
-        idx = random.randint(0, 4)
+        idx = random.randint(1, 4)
         if idx == 1:
             return psg
         elif idx == 2:
@@ -154,6 +154,7 @@ class GroupedTrainQA(Dataset):
             else:
                 psg = psg + text[:remain]
             return psg
+        return psg
 
     def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
         group = self.nlp_dataset[item]

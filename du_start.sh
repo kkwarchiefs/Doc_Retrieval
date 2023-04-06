@@ -118,7 +118,7 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --passage_path $passage_path \
   --logging_steps 50 \
   --do_train \
-  --save_steps 1000 \
+  --save_steps 500 \
   --train_dir $train_data_dir \
   --q_max_len 32 \
   --p_max_len 384 \
@@ -133,7 +133,7 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --overwrite_output_dir \
   --dataloader_num_workers 3 \
   --evaluation_strategy steps \
-  --eval_steps 500 \
+  --eval_steps 200 \
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 
