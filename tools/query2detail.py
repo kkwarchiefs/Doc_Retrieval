@@ -15,16 +15,17 @@ def read_rocket():
     id2pos = {}
     id2neg = {}
     for line in open('./tempdata/rocket_rand128.json'):
-        ins = json.load(line)
+        ins = json.loads(line)
         id2pos[ins['qry']] = ins['pos']
         id2neg[ins['qry']] = ins['neg']
     for line in open('./tempdata/rocket_aug128.json'):
-        ins = json.load(line)
+        ins = json.loads(line)
         id2pos[ins['qry']] = list(set(id2pos[ins['qry']] + ins['pos']))
         id2neg[ins['qry']] = list(set(id2neg[ins['qry']] + ins['neg']))
     return id2pos, id2neg
 
 if __name__ == "__main__":
+    id2pos, id2neg = read_rocket()
     for line in sys.stdin:
         ins = json.loads(line)
         prompt = ins['prompt'].replace('\n\n', '\n').split('\n')[1:]
@@ -36,4 +37,8 @@ if __name__ == "__main__":
         for a,b,c in zip(label, prompt, response):
             b = re.sub('^\\d+\\.', '', b).strip()
             c = re.sub('^\\d+\\.', '', c).strip()
-            print({'qry':a, 'en': b, 'zh': c})
+            if a not in id2pos:
+                continue
+            pos = id2pos[a]
+            neg = id2neg[a]
+            print(json.dumps({'qry':a, 'en': b, 'zh': c, "pos": pos, 'neg':neg},ensure_ascii=False))

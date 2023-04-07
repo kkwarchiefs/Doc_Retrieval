@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser()
 # parser.add_argument("--device", type=int, default=0)
 # args = parser.parse_args()
 
-model_name = "embedding_passage_onnx"
+model_name = "embedding_mul_onnx"
 device = torch.device('cuda:0')
 
 class RetrieverInfer(nn.Module):
@@ -26,10 +26,9 @@ class RetrieverInfer(nn.Module):
         model = cls(hf_model)
         return model
 
-    def forward(self, input_ids, token_type_ids, attention_mask):
+    def forward(self, input_ids, attention_mask):
         doc_input = {}
         doc_input['input_ids'] = input_ids.to(self.model.device)
-        doc_input['token_type_ids'] = token_type_ids.to(self.model.device)
         doc_input['attention_mask'] = attention_mask.to(self.model.device)
         doc_out = self.model(**doc_input, return_dict=True)
         return doc_out.last_hidden_state[:, 0]
@@ -64,7 +63,7 @@ torch.onnx.export(
 	RM_model,
 	inputs,
 	f"/search/ai/jamsluo/passage_rank/du_task_output/model_store/{model_name}/1/model.onnx",  # 输出模型文件名
-	input_names=['input_ids', 'token_type_ids', 'attention_mask'],  # 输入节点名，每一个名称对应一个输入名
+	input_names=['input_ids', 'attention_mask'],  # 输入节点名，每一个名称对应一个输入名
     output_names=['output'],  # 输出节点名，每一个名称对应一个输出名
 	opset_version=14,
 	dynamic_axes={'input_ids': {0: 'B', 1: 'C'}, 'attention_mask': {0: 'B', 1: 'C'}}  # 声明动态维度，默认输入维度固定，可以声明为可变维度（用字符串占位符表示）

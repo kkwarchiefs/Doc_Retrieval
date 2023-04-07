@@ -176,6 +176,98 @@ class GroupedTrainQA(Dataset):
             group_batch.append(self.create_one_example(psg, self.args.p_max_len))
         return encoded_query, group_batch
 
+class GroupedTrainMUL(Dataset):
+    def __init__(
+            self,
+            args: DataArguments,
+            path_to_tsv: Union[List[str], str],
+            tokenizer: PreTrainedTokenizer,
+            train_args: RerankerTrainingArguments = None,
+    ):
+        self.nlp_dataset = datasets.load_dataset(
+            'json',
+            data_files=path_to_tsv,
+        )['train']
+
+        self.tok = tokenizer
+        self.SEP = [self.tok.sep_token_id]
+        self.args = args
+        self.total_len = len(self.nlp_dataset)
+        self.train_args = train_args
+        # with open(args.passage_path + '/passage2id.map.json', "r") as fr:
+        #     self.pcid2pid = json.load(fr)
+        # self.idx2txt = self.read_part(args.passage_path)
+        root = '/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/'
+        self.idx2zh = pickle.load(open(root + "passage_idx.pkl", 'rb'))
+        self.idx2en = pickle.load(open(root + "en_passage_idx.pkl", 'rb'))
+
+    def __len__(self):
+        return self.total_len
+
+    def create_one_example(self, doc_encoding: str, max_len:int):
+        item = self.tok.encode_plus(
+            doc_encoding.strip(),
+            truncation=True,
+            max_length=max_len,
+            padding=False,
+        )
+        return item
+
+    def cut_words(self, psg):
+        if len(psg) >= self.args.p_max_len:
+            return psg
+        newid = random.randint(0, self.total_len - 10)
+        group = self.nlp_dataset[newid]
+        pos_pid = random.choice(group['pos'])
+        text = self.idx2txt[int(pos_pid)]
+        remain = self.args.p_max_len - len(psg)
+        idx = random.randint(1, 4)
+        if idx == 1:
+            return psg
+        elif idx == 2:
+            start = random.randint(0,3)
+            return psg[start:]
+        elif idx == 3:
+            start = random.randint(0,20)
+            psg = text[start:remain+start] + psg
+            return psg
+        elif idx == 4:
+            if random.randint(0, 1) == 0:
+                psg = text[:remain] + psg
+            else:
+                psg = psg + text[:remain]
+            return psg
+        return psg
+
+    def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
+        group = self.nlp_dataset[item]
+        qtext = group['qry']
+        is_english = False
+        if 'zh' in group:
+            if random.randint(0,1) == 0:
+                qtext = group['zh']
+            else:
+                qtext = group['en']
+            is_english = True
+        pos_pid = random.choice(group['pos'])
+        neg_group = group['neg']
+        if len(neg_group) < self.args.train_group_size:
+            negs = random.choices(neg_group, k=self.args.train_group_size)
+        else:
+            negs = random.sample(neg_group, k=self.args.train_group_size)
+        negs[0] = pos_pid
+        group_batch = []
+        encoded_query = self.create_one_example(qtext, self.args.q_max_len)
+        for neg_id in negs:
+            if is_english:
+                psg = self.idx2en[int(neg_id)]
+            else:
+                psg = self.idx2zh[int(neg_id)]
+            # psg = self.cut_words(psg)
+            group_batch.append(self.create_one_example(psg, self.args.p_max_len))
+        return encoded_query, group_batch
+
+
 class GroupedTrainLine(Dataset):
     def __init__(
             self,
