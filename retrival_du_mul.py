@@ -195,7 +195,7 @@ def main():
         print(model_args)
         print(data_args)
         print(training_args)
-        qry, doc = train_dataset[random.choice(range(train_dataset.__len__()))][:2]
+        qry, doc = train_dataset[random.choice(range(train_dataset.__len__()))]
         input_ids = qry['input_ids']
         print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
         input_ids = doc[0]['input_ids']

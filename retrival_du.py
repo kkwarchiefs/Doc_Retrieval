@@ -112,7 +112,7 @@ def main():
         use_fast=False,
     )
 
-    _model_class = RetrieverQA  # COILSentence
+    _model_class = RetrieverMean  # COILSentence
     _trainer_class = RerankerRetrival
     _train_class = GroupedTrainQA
     _eval_class = PredictionQA
