@@ -31,7 +31,7 @@ class RetrieverInfer(nn.Module):
         doc_input['input_ids'] = input_ids.to(self.model.device)
         doc_input['attention_mask'] = attention_mask.to(self.model.device)
         doc_out = self.model(**doc_input, return_dict=True)
-        return doc_out.last_hidden_state[:, 0]
+        return doc_out.pooler_output
 
 
 RM_model_path = "/search/ai/jamsluo/passage_rank/du_task_output/ernie_base_g49_5e5/checkpoint-16000/"
