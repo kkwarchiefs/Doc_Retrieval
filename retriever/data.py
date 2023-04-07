@@ -185,7 +185,7 @@ class GroupedTrainMUL(Dataset):
             train_args: RerankerTrainingArguments = None,
     ):
         self.nlp_dataset = datasets.load_dataset(
-            'json',
+            'text',
             data_files=path_to_tsv,
         )['train']
 
@@ -240,7 +240,7 @@ class GroupedTrainMUL(Dataset):
         return psg
 
     def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
-        group = self.nlp_dataset[item]
+        group = json.loads(self.nlp_dataset[item]['text'])
         qtext = group['qry']
         is_english = False
         if 'zh' in group:
