@@ -235,6 +235,7 @@ class RetrieverQA(nn.Module):
         path = os.path.join(output_dir, "pytorch_model.bin")
         model_to_save = self.module if hasattr(self, "module") else self
         torch.save(model_to_save.state_dict(), path)
+        self.model.config.save_pretrained(output_dir)
 
     def forward(self, qry_input: Dict, doc_input: Dict):
         group_size = self.data_args.train_group_size
