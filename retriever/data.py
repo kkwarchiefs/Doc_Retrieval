@@ -325,16 +325,8 @@ class PredictionQA(Dataset):
         self.q_max_len = q_max_len
         self.p_max_len = p_max_len
         self.args = args
-        # self.idx2txt = self.read_part(args.passage_path)
-        self.idx2txt = pickle.load(open(args.passage_path, 'rb'))
-
-    def read_part(self, passage_path):
-        qid2txt = []
-        for i in range(4):
-            for line in open(passage_path + '/part-0' + str(i), 'r', encoding='utf-8'):
-                items = line.strip().split('\t')
-                qid2txt.append(items[2])
-        return qid2txt
+        root = '/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/'
+        self.idx2txt = pickle.load(open(root + "passage_idx.pkl", 'rb'))
 
     def __len__(self):
         return len(self.nlp_dataset)
