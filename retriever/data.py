@@ -346,6 +346,40 @@ class PredictionQA(Dataset):
         neg_id = group[1]
         return self.create_one_example(qtext, self.q_max_len), self.create_one_example(self.idx2txt[int(neg_id)], self.p_max_len)
 
+class PredictionPure(Dataset):
+    columns = [
+        'qid', 'pid', 'qry', 'psg'
+    ]
+
+    def __init__(self, args: DataArguments, path_to_json: List[str], tokenizer: PreTrainedTokenizer, q_max_len=32, p_max_len=128):
+        self.nlp_dataset = datasets.load_dataset(
+            'text',
+            data_files=path_to_json,
+        )['train']
+        self.tok = tokenizer
+        self.q_max_len = q_max_len
+        self.p_max_len = p_max_len
+        self.args = args
+
+    def __len__(self):
+        return len(self.nlp_dataset)
+
+    def create_one_example(self, doc_encoding: str, max_len: int):
+        item = self.tok.encode_plus(
+            doc_encoding.strip(),
+            truncation=True,
+            max_length=max_len,
+            padding=False,
+        )
+        return item
+
+    def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
+        group = self.nlp_dataset[item]['text'].split('\t')
+        qtext = group[0]
+        ptext = group[1]
+        return self.create_one_example(qtext, self.q_max_len), self.create_one_example(ptext, self.p_max_len)
+
+
 class RetrivalPredictionDataset(Dataset):
     columns = [
         'qid', 'pid', 'qry', 'psg'

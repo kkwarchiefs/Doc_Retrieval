@@ -115,8 +115,8 @@ def main():
     _model_class = RetrieverMean  # COILSentence
     _trainer_class = RerankerRetrival
     _train_class = GroupedTrainMUL
-    _eval_class = PredictionQA
-    _test_class = PredictionQA
+    _eval_class = PredictionPure
+    _test_class = PredictionPure
     model = _model_class.from_pretrained(
         model_args, data_args, training_args,
         model_args.model_name_or_path,
