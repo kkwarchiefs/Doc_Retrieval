@@ -142,6 +142,9 @@ if __name__ == '__main__':
     #          "一年国家法定节假日为11天。根据公布的国家法定节假日调整方案，调整的主要内容包括：元旦放假1天不变；春节放假3天，放假时间为农历正月初一、初二、初三；“五一”国际劳动节1天不变；“十一”国庆节放假3天；清明节、端午节、中秋节增设为国家法定节假日，各放假1天(农历节日如遇闰月，以第一个月为休假日)。3、允许周末上移下错，与法定节假日形成连休。",
     #          "我国制定的法定节假日都是在规定的时间之内,要求用人单位给员工带薪休假的。不过如果不休假的话,按时的支付加班费也可以。法定节假日肯定是在规定的时间之内放假的,我国每年的法定节假日总体算起来也是相当长的一段时间。那么按照我国的规定,国家法定假日一年多少天呢?一、国家法定假日一年多少天?一年中法定假日包括周六周日一共有115天或116天。计算方法:我国共有法定节假日11天(包括春节、国庆两个假期各3天,元旦、清明、五",
     #          "一年中国家法定节假日有哪些天中国的法定节假日是给上班族的休息时间,也是国家对上班族给予的休息权利。但是节假日的多少是有法律规定的,那么一年法定节假日多少天呢?法律对于劳动者休息的权利做了相应的规定,一周休息两天以及国家规定的一些重要节日的假期,一共有一百一十五天左右。详细内容华律网小编为你解答。"]
+    parts = ["Several families of Byzantine Greece were of Norman mercenary origin during the period of the Comnenian Restoration, when Byzantine emperors were seeking out western European warriors. The Raoulii were descended from an Italo-Norman named Raoul, the Petraliphae were descended from a Pierre d'Aulps, and that group of Albanian clans known as the Maniakates were descended from Normans who served under George Maniaces in the Sicilian expedition of 1038.",
+             "在圣埃夫鲁（Saint Evroul），歌唱的传统得到了发展，合唱团在诺曼底声名achieved起。在诺曼方丈罗伯特·德·格兰特梅尼尔（Robert de Grantmesnil）的统治下，圣埃夫鲁的几名僧侣逃往意大利南部，罗伯>特·吉斯卡德（Robert Guiscard）资助他们，并在圣欧菲米娅（Sant'Eufemia）建立了一座拉丁修道院。在那里，他们延续了唱歌的传统。",
+             "拜占庭事态的进一步下降为1185年的第三次进攻铺平了道路，当时，由于背叛了拜占庭的高级官员，一支庞大的诺曼军队入侵了Dyrachium。一段时间后，Dy拉虫病（亚得里亚海最重要的海军基地之一）再次落入>拜占庭之手。"]
     embed = get_embedding(parts)
     while True:
         raw_text = input("\nContext prompt (stop to exit) >>> ")
