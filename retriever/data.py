@@ -242,11 +242,13 @@ class GroupedTrainMUL(Dataset):
     def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
         group = self.nlp_dataset[item] #json.loads(self.nlp_dataset[item]['text'])
 
-        is_english = group['zh'] == group['qry']
+        is_english = group['zh'] != group['qry']
         if random.randint(0, 1) == 0:
             qtext = group['zh']
         else:
             qtext = group['en']
+            if qtext == "NULL":
+                qtext = group['zh']
         pos_pid = random.choice(group['pos'])
         neg_group = group['neg']
         if len(neg_group) < self.args.train_group_size:
