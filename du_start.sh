@@ -137,7 +137,7 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/infoxml_g3_5e5_64_512_sec
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/infoxml_g3_5e5_64_512_four
 init_dir=/search/ai/pretrain_models/infoxlm-base/
 passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train/
@@ -146,7 +146,6 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_du.py \
   --output_dir $output_dir \
   --model_name_or_path  $init_dir \
   --passage_path $passage_path \
-  --resume_from_checkpoint /search/ai/jamsluo/passage_rank/du_task_output/infoxml_g3_5e5_64_512_sec/checkpoint-600 \
   --logging_steps 50 \
   --do_train \
   --save_steps 600 \
