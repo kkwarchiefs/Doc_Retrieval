@@ -310,6 +310,47 @@ class GroupedTrainLine(Dataset):
             group_batch.append(self.create_one_example(ptext, self.args.p_max_len))
         return encoded_query, group_batch
 
+class GroupedTrainPure(Dataset):
+    def __init__(
+            self,
+            args: DataArguments,
+            path_to_tsv: Union[List[str], str],
+            tokenizer: PreTrainedTokenizer,
+            train_args: RerankerTrainingArguments = None,
+    ):
+        self.nlp_dataset = datasets.load_dataset(
+            'text',
+            data_files=path_to_tsv,
+        )['train']
+
+        self.tok = tokenizer
+        self.args = args
+        self.args.train_group_size = 2
+        self.total_len = len(self.nlp_dataset)
+        self.train_args = train_args
+
+
+    def __len__(self):
+        return self.total_len
+
+    def create_one_example(self, doc_encoding: str, max_len:int):
+        item = self.tok.encode_plus(
+            doc_encoding.strip(),
+            truncation=True,
+            max_length=max_len,
+            padding=False,
+        )
+        return item
+
+    def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
+        group = self.nlp_dataset[item]['text'].split('\t')
+        qtext = group[0]
+        group_batch = []
+        encoded_query = self.create_one_example(qtext, self.args.q_max_len)
+        for ptext in [group[1], group[2]]:
+            group_batch.append(self.create_one_example(ptext, self.args.p_max_len))
+        return encoded_query, group_batch
+
 
 class PredictionQA(Dataset):
     columns = [
