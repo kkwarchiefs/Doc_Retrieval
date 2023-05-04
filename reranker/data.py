@@ -126,6 +126,90 @@ class PredictionDuQA(Dataset):
         # return group_batch
 
 
+class GroupedTrainSquad(Dataset):
+    def __init__(
+            self,
+            args: DataArguments,
+            path_to_tsv: Union[List[str], str],
+            tokenizer: PreTrainedTokenizer,
+            train_args: RerankerTrainingArguments = None,
+    ):
+        self.nlp_dataset = datasets.load_dataset(
+            'text',
+            data_files=path_to_tsv,
+        )['train']
+
+        self.tok = tokenizer
+        self.SEP = [self.tok.sep_token_id]
+        self.args = args
+        self.total_len = len(self.nlp_dataset)
+        self.train_args = train_args
+
+    def __len__(self):
+        return self.total_len
+
+    def create_one_example(self, doc_encoding: str):
+        item = self.tok.encode_plus(
+            doc_encoding,
+            truncation=True,
+            max_length=self.args.max_len,
+            padding=False,
+        )
+        return item
+
+    def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
+        group = self.nlp_dataset[item]['text'].split('\t')
+        qtext = group[0]
+        pos_pid = group[1]
+        neg_group = [group[1], group[2]]
+        while len(neg_group) < self.args.train_group_size:
+            idx = random.randint(0, self.__len__())
+            neg_case = self.nlp_dataset[idx]['text'].split('\t')
+            if neg_case[1] != pos_pid:
+                neg_group.append(neg_case[2])
+        group_batch = []
+        for neg_text in neg_group:
+            psg = 'Q:' + qtext + 'A:' + neg_text
+            group_batch.append(self.create_one_example(psg))
+        return group_batch
+
+class PredictionSquad(Dataset):
+
+    def __init__(self, args: DataArguments, path_to_json: List[str], tokenizer: PreTrainedTokenizer, max_len=128):
+        self.nlp_dataset = datasets.load_dataset(
+            'text',
+            data_files=path_to_json,
+        )['train']
+        self.tok = tokenizer
+        self.max_len = max_len
+        self.args = args
+
+    def __len__(self):
+        return len(self.nlp_dataset)
+
+    def create_one_example(self, doc_encoding: str):
+        item = self.tok.encode_plus(
+            doc_encoding,
+            truncation=True,
+            max_length=self.args.max_len,
+            padding=False,
+        )
+        return item
+
+    def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
+        group = self.nlp_dataset[item]['text'].split('\t')
+        qtext = group[0]
+        neg_text = group[1]
+        psg = 'Q:' + qtext + 'A:' + neg_text
+        return self.create_one_example(psg)
+        # qtext = group['qry']
+        # neg_group = group['neg']
+        # group_batch = []
+        # for neg_id in neg_group:
+        #     psg = '问题：' + qtext + '，答案：' + self.idx2txt[int(neg_id)]
+        #     group_batch.append(self.create_one_example(psg))
+        # return group_batch
+
 class GroupedTrainDatasetURLTitle(Dataset):
     def __init__(
             self,
@@ -862,6 +946,7 @@ class EventPredictionDataset(Dataset):
         for iid in [pos_pid] + neg_group:
             group_batch.append(self.create_one_example(qid, iid))
         return group_batch
+
 
 
 
