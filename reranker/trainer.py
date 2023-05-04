@@ -17,7 +17,7 @@ from torch.utils.checkpoint import get_device_states, set_device_states
 from torch.utils.data.distributed import DistributedSampler
 
 from transformers.trainer import Trainer, nested_detach
-from transformers.trainer_utils import PredictionOutput, EvalPrediction
+from transformers.trainer_utils import PredictionOutput, EvalPrediction, EvalLoopOutput
 import logging
 from apex import amp
 logger = logging.getLogger(__name__)
@@ -124,7 +124,7 @@ class RerankerTrainer(Trainer):
             self,
             *args,
             **kwargs
-    ) -> PredictionOutput:
+    ) -> EvalLoopOutput:
         pred_outs = super().prediction_loop(*args, **kwargs)
         preds, label_ids, metrics = pred_outs.predictions, pred_outs.label_ids, pred_outs.metrics
         preds = preds.squeeze()
@@ -137,4 +137,4 @@ class RerankerTrainer(Trainer):
         #     if not key.startswith("eval_"):
         #         metrics_no_label[f"eval_{key}"] = metrics_no_label.pop(key)
 
-        return PredictionOutput(predictions=preds, label_ids=label_ids, metrics={**metrics, **metrics_no_label})
+        return EvalLoopOutput(predictions=preds, label_ids=label_ids, metrics={**metrics, **metrics_no_label}, num_samples=preds.shape[0])
