@@ -210,6 +210,96 @@ class PredictionSquad(Dataset):
         #     group_batch.append(self.create_one_example(psg))
         # return group_batch
 
+class GroupedTrainMSMul(Dataset):
+    def __init__(
+            self,
+            args: DataArguments,
+            path_to_tsv: Union[List[str], str],
+            tokenizer: PreTrainedTokenizer,
+            train_args: RerankerTrainingArguments = None,
+    ):
+        self.nlp_dataset = datasets.load_dataset(
+            'json',
+            data_files=path_to_tsv,
+        )['train']
+
+        self.tok = tokenizer
+        self.SEP = [self.tok.sep_token_id]
+        self.args = args
+        self.total_len = len(self.nlp_dataset)
+        self.train_args = train_args
+        root = '/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/'
+        self.idx2zh = pickle.load(open(root + "passage_idx.pkl", 'rb'))
+        self.idx2en = pickle.load(open(root + "en_passage_idx.pkl", 'rb'))
+
+    def __len__(self):
+        return self.total_len
+
+    def create_one_example(self, doc_encoding: str):
+        item = self.tok.encode_plus(
+            doc_encoding,
+            truncation=True,
+            max_length=self.args.max_len,
+            padding=False,
+        )
+        return item
+
+    def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
+        group = self.nlp_dataset[item]
+        is_english = group['zh'] != group['qry']
+        if random.randint(0, 1) == 0:
+            qtext = group['zh']
+        else:
+            qtext = group['en']
+            if qtext == "NULL":
+                qtext = group['zh']
+        pos_pid = random.choice(group['pos'])
+        neg_group = group['neg']
+        if len(neg_group) < self.args.train_group_size:
+            negs = random.choices(neg_group, k=self.args.train_group_size)
+        else:
+            negs = random.sample(neg_group, k=self.args.train_group_size)
+        negs[0] = pos_pid
+        group_batch = []
+        for neg_id in negs:
+            if is_english:
+                psg = self.idx2en[int(neg_id)]
+            else:
+                psg = self.idx2zh[int(neg_id)]
+            qry_psg = 'Q:' + qtext + 'A:' + psg
+            group_batch.append(self.create_one_example(qry_psg))
+        return group_batch
+
+class PredictionMSMul(Dataset):
+
+    def __init__(self, args: DataArguments, path_to_json: List[str], tokenizer: PreTrainedTokenizer, max_len=128):
+        self.nlp_dataset = datasets.load_dataset(
+            'text',
+            data_files=path_to_json,
+        )['train']
+        self.tok = tokenizer
+        self.max_len = max_len
+        self.args = args
+
+    def __len__(self):
+        return len(self.nlp_dataset)
+
+    def create_one_example(self, doc_encoding: str):
+        item = self.tok.encode_plus(
+            doc_encoding,
+            truncation=True,
+            max_length=self.args.max_len,
+            padding=False,
+        )
+        return item
+
+    def __getitem__(self, item) -> [List[BatchEncoding], List[int]]:
+        group = self.nlp_dataset[item]['text'].split('\t')
+        qtext = group[0]
+        ptext = group[1]
+        psg = 'Q:' + qtext + 'A:' + ptext
+        return self.create_one_example(psg)
+
 class GroupedTrainDatasetURLTitle(Dataset):
     def __init__(
             self,
