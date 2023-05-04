@@ -256,22 +256,22 @@ output_dir=/search/ai/jamsluo/passage_rank/du_task_output/rerank_mulit_mpnet_squ
 init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad/
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair.tsv
-env CUDA_VISIBLE_DEVICES=0 python3 rerank_squad.py \
+python3 -m torch.distributed.launch --nproc_per_node 8 rerank_squad.py \
   --output_dir $output_dir \
   --model_name_or_path  $init_dir \
   --logging_steps 50 \
   --do_train \
   --save_steps 500 \
   --train_dir $train_data_dir \
-  --max_len 128 \
+  --max_len 512 \
   --seed 66 \
-  --per_device_train_batch_size 10 \
-  --train_group_size 8 \
+  --per_device_train_batch_size 24 \
+  --train_group_size 4 \
   --per_device_eval_batch_size 128 \
   --warmup_ratio 0.1 \
   --weight_decay 0.01 \
   --learning_rate 3e-5 \
-  --num_train_epochs 6 \
+  --num_train_epochs 10 \
   --overwrite_output_dir \
   --dataloader_num_workers 4 \
   --evaluation_strategy steps \

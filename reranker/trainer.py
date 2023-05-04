@@ -44,9 +44,9 @@ class RerankerTrainer(Trainer):
     def _get_train_sampler(self):
         if self.args.local_rank == -1:
             return RandomSampler(self.train_dataset)
-        elif self.args.collaborative:
-            logger.info(f'Collaborative Mode.')
-            return SyncedSampler(self.train_dataset, seed=self.args.seed)
+        # elif self.args.collaborative:
+        #     logger.info(f'Collaborative Mode.')
+        #     return SyncedSampler(self.train_dataset, seed=self.args.seed)
         else:
             return DistributedSampler(self.train_dataset)
 
