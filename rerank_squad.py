@@ -18,6 +18,7 @@ from reranker.arguments import ModelArguments, DataArguments, \
 from reranker.data import *
 from reranker.modeling import *
 from reranker.trainer import RerankerTrainer
+os.environ["WANDB_DISABLED"] = "true"
 
 
 def main():
