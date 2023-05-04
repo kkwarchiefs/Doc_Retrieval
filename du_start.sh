@@ -252,7 +252,7 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_squad_pooling.py
   --use_legacy_prediction_loop
 
 
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/rerank_mulit_mpnet_squad
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/rerank_mulit_mpnet_squad_v2
 init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad/
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair.tsv
@@ -274,8 +274,7 @@ python3 -m torch.distributed.launch --nproc_per_node 8 rerank_squad.py \
   --num_train_epochs 10 \
   --overwrite_output_dir \
   --dataloader_num_workers 4 \
-  --evaluation_strategy steps \
-  --eval_steps 20 \
+  --evaluation_strategy epoch \
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 

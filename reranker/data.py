@@ -163,7 +163,7 @@ class GroupedTrainSquad(Dataset):
         pos_pid = group[1]
         neg_group = [group[1], group[2]]
         while len(neg_group) < self.args.train_group_size:
-            idx = random.randint(0, self.__len__())
+            idx = random.randint(0, self.__len__()-1)
             neg_case = self.nlp_dataset[idx]['text'].split('\t')
             if neg_case[1] != pos_pid:
                 neg_group.append(neg_case[2])
