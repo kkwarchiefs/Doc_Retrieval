@@ -264,9 +264,9 @@ class GroupedTrainMSMul(Dataset):
             negs = random.sample(neg_group, k=hard_neg)
         rand_neg = self.args.train_group_size - hard_neg
         if is_english:
-            ids = random.sample(self.zhlist, k=rand_neg)
-        else:
             ids = random.sample(self.enlist, k=rand_neg)
+        else:
+            ids = random.sample(self.zhlist, k=rand_neg)
         negs += ids
         negs[0] = pos_pid
         group_batch = []
