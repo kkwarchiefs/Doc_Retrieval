@@ -333,6 +333,70 @@ class RetrieverQAPooling(nn.Module):
             loss = self.cross_entropy(scores, index)
             return loss, loss
 
+class ColBert(nn.Module):
+    def __init__(self, model: PreTrainedModel, model_args: ModelArguments, data_args: DataArguments,
+                 train_args: TrainingArguments, config):
+        super().__init__()
+        self.model: PreTrainedModel = model
+        self.cross_entropy = nn.CrossEntropyLoss(reduction='mean')
+        self.data_args, self.model_args, self.train_args = data_args, model_args, train_args
+        self.linear = nn.Linear(config.hidden_size, 128, bias=False)
+
+    @classmethod
+    def from_pretrained(
+            cls, model_args: ModelArguments, data_args: DataArguments, train_args: TrainingArguments,
+            *args, **kwargs
+    ):
+        hf_model = AutoModel.from_pretrained(*args, **kwargs)
+        model = cls(hf_model, model_args, data_args, train_args, kwargs['config'])
+        return model
+
+    def save_pretrained(self, output_dir: str):
+        path = os.path.join(output_dir, "pytorch_model.bin")
+        model_to_save = self.module if hasattr(self, "module") else self
+        torch.save(model_to_save.state_dict(), path)
+        self.model.config.save_pretrained(output_dir)
+
+    def forward(self, qry_input: Dict, doc_input: Dict):
+        group_size = self.data_args.train_group_size
+        if 'label' in doc_input:
+            labels = doc_input.pop('label').to(self.model.device)
+        qry_input['input_ids'] = qry_input['input_ids'].to(self.model.device)
+        if 'token_type_ids' in qry_input:
+            qry_input['token_type_ids'] = qry_input['token_type_ids'].to(self.model.device)
+        qry_input['attention_mask'] = qry_input['attention_mask'].to(self.model.device)
+        doc_input['input_ids'] = doc_input['input_ids'].to(self.model.device)
+        if 'token_type_ids' in doc_input:
+            doc_input['token_type_ids'] = doc_input['token_type_ids'].to(self.model.device)
+        doc_input['attention_mask'] = doc_input['attention_mask'].to(self.model.device)
+        qry_out: BaseModelOutputWithPooling = self.model(**qry_input, return_dict=True)
+        doc_out: BaseModelOutputWithPooling = self.model(**doc_input, return_dict=True)
+
+        qry_token_embeddings = qry_out.last_hidden_state
+        qry_cls = self.linear(qry_token_embeddings)
+        qry_cls = torch.nn.functional.normalize(qry_cls, p=2, dim=2)
+
+        doc_token_embeddings = doc_out.last_hidden_state
+        doc_cls = self.linear(doc_token_embeddings)
+        doc_cls = torch.nn.functional.normalize(doc_cls, p=2, dim=2)
+
+        if not self.training:
+            score_ir = (qry_cls @ doc_cls.permute(0, 2, 1)).max(2).values.sum(1)
+            return score_ir
+        else:
+            qry_cls = qry_cls.unsqueeze(1)
+            doc_cls = doc_cls.unsqueeze(0)
+            scores = (qry_cls @ doc_cls.permute(0, 1, 3, 2)).max(3).values.sum(2)
+            index = torch.arange(
+                scores.size(0),
+                device=doc_input['input_ids'].device,
+                dtype=torch.long
+            )
+            # offset the labels
+            index = index * self.data_args.train_group_size
+            loss = self.cross_entropy(scores, index)
+            return loss, loss
+
 
 class RetrieverMean(nn.Module):
     def __init__(self, model: PreTrainedModel, model_args: ModelArguments, data_args: DataArguments,
