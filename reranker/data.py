@@ -231,6 +231,8 @@ class GroupedTrainMSMul(Dataset):
         root = '/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/'
         self.idx2zh = pickle.load(open(root + "passage_idx.pkl", 'rb'))
         self.idx2en = pickle.load(open(root + "en_passage_idx.pkl", 'rb'))
+        self.zhlist = list(range(0, len(self.idx2zh)-10))
+        self.enlist = list(range(0, len(self.idx2en)-10))
 
     def __len__(self):
         return self.total_len
@@ -255,10 +257,17 @@ class GroupedTrainMSMul(Dataset):
                 qtext = group['zh']
         pos_pid = random.choice(group['pos'])
         neg_group = group['neg']
-        if len(neg_group) < self.args.train_group_size:
-            negs = random.choices(neg_group, k=self.args.train_group_size)
+        hard_neg = int(self.args.train_group_size / 3 * 2)
+        if len(neg_group) < hard_neg:
+            negs = random.choices(neg_group, k=hard_neg)
         else:
-            negs = random.sample(neg_group, k=self.args.train_group_size)
+            negs = random.sample(neg_group, k=hard_neg)
+        rand_neg = self.args.train_group_size - hard_neg
+        if is_english:
+            ids = random.sample(self.zhlist, k=rand_neg)
+        else:
+            ids = random.sample(self.enlist, k=rand_neg)
+        negs += ids
         negs[0] = pos_pid
         group_batch = []
         for neg_id in negs:

@@ -29,9 +29,9 @@ if __name__ == "__main__":
             if v[0] == gold:
                 score += 1/(id+1)
                 detail[id+1] += 1
-                print(k, '\t'.join(v), id+1, True, sep='\t')
-            else:
-                print(k, '\t'.join(v), id + 1, False, sep='\t')
+            #     print(k, '\t'.join(v), id+1, True, sep='\t')
+            # else:
+            #     print(k, '\t'.join(v), id + 1, False, sep='\t')
     print('score:', score/len(qry2res), file=sys.stderr)
     print("detail:", detail, file=sys.stderr)
 
