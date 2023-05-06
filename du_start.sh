@@ -279,6 +279,62 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_squad_pooling.py
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim64_msmarco
+init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
+train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad_second/
+pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair_msmarco_5k.tsv
+python3 -m torch.distributed.launch --nproc_per_node 7 retrival_squad_pooling.py \
+  --output_dir $output_dir \
+  --model_name_or_path  $init_dir \
+  --logging_steps 10 \
+  --do_train \
+  --save_steps 200 \
+  --train_dir $train_data_dir \
+  --q_max_len 128 \
+  --p_max_len 512 \
+  --seed 66 \
+  --per_device_train_batch_size 48 \
+  --train_group_size 2 \
+  --per_device_eval_batch_size 128 \
+  --warmup_ratio 0.1 \
+  --weight_decay 0.01 \
+  --learning_rate 5e-5 \
+  --num_train_epochs 10 \
+  --overwrite_output_dir \
+  --dataloader_num_workers 2 \
+  --evaluation_strategy steps \
+  --eval_steps 200 \
+  --pred_path $pred_path \
+  --use_legacy_prediction_loop
+
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim64_msmarco_dureader
+init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
+train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad_third/
+pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair_msmarco5k_ducross5k.tsv
+python3 -m torch.distributed.launch --nproc_per_node 8 retrival_squad_pooling.py \
+  --output_dir $output_dir \
+  --model_name_or_path  $init_dir \
+  --logging_steps 10 \
+  --do_train \
+  --save_steps 1000 \
+  --train_dir $train_data_dir \
+  --q_max_len 128 \
+  --p_max_len 512 \
+  --seed 66 \
+  --per_device_train_batch_size 48 \
+  --train_group_size 2 \
+  --per_device_eval_batch_size 128 \
+  --warmup_ratio 0.1 \
+  --weight_decay 0.01 \
+  --learning_rate 5e-5 \
+  --num_train_epochs 10 \
+  --overwrite_output_dir \
+  --dataloader_num_workers 2 \
+  --evaluation_strategy steps \
+  --eval_steps 1000 \
+  --pred_path $pred_path \
+  --use_legacy_prediction_loop
+
 
 output_dir=/search/ai/jamsluo/passage_rank/du_task_output/rerank_mulit_mpnet_squad_v2
 init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
