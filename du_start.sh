@@ -251,7 +251,7 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_squad_pooling.py
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim32
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim64
 init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad/
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair.tsv
