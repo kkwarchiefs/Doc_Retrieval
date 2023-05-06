@@ -17,7 +17,7 @@ def convert_model():
     model_dict = torch.load(os.path.join(RM_model_path, 'pytorch_model.bin'), map_location="cpu")
     for k, _ in model_dict.items():
         print(k)
-    new_model_dict = {k.replace('hf_model.', ''): v for k, v in model_dict.items()}
+    new_model_dict = {k.replace('model.', ''): v for k, v in model_dict.items()}
     torch.save(new_model_dict, os.path.join(RM_model_path, 'pytorch_model.bin'))
 
 def read_model():

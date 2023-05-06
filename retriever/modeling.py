@@ -340,7 +340,7 @@ class ColBert(nn.Module):
         self.model: PreTrainedModel = model
         self.cross_entropy = nn.CrossEntropyLoss(reduction='mean')
         self.data_args, self.model_args, self.train_args = data_args, model_args, train_args
-        self.linear = nn.Linear(config.hidden_size, 128, bias=False)
+        self.linear = nn.Linear(config.hidden_size, 32, bias=False)
 
     @classmethod
     def from_pretrained(
