@@ -112,7 +112,7 @@ def main():
         use_fast=False,
     )
 
-    _model_class = RetrieverQAPooling  # COILSentence
+    _model_class = ColBert #RetrieverQAPooling  # COILSentence
     _trainer_class = RerankerRetrival
     _train_class = GroupedTrainPure
     _eval_class = PredictionPure
