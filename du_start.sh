@@ -317,7 +317,7 @@ torchrun --nproc_per_node=8 --master_port=8899 retrival_squad_pooling.py \
   --model_name_or_path  $init_dir \
   --logging_steps 50 \
   --do_train \
-  --save_steps 20 \
+  --save_strategy epoch \
   --train_dir $train_data_dir \
   --q_max_len 128 \
   --p_max_len 512 \
