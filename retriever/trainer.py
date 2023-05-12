@@ -22,7 +22,7 @@ from apex import amp
 logger = logging.getLogger(__name__)
 
 class RerankerRetrival(Trainer):
-    def _save(self, output_dir: Optional[str] = None, state_dict=state_dict):
+    def _save(self, output_dir: Optional[str] = None, state_dict=None):
         output_dir = output_dir if output_dir is not None else self.args.output_dir
         os.makedirs(output_dir, exist_ok=True)
         logger.info("Saving model checkpoint to %s", output_dir)

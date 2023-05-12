@@ -312,7 +312,7 @@ output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_openqa_s
 init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad_msmarco_exact_gpt/
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair_msmarco_5k_exact.tsv
-env CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=2 --master_port=8899 retrival_squad_pooling.py \
+torchrun --nproc_per_node=8 --master_port=8899 retrival_squad_pooling.py \
   --output_dir $output_dir \
   --model_name_or_path  $init_dir \
   --logging_steps 50 \
