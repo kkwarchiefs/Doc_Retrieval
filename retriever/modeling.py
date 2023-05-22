@@ -373,10 +373,14 @@ class ColBert(nn.Module):
         doc_out: BaseModelOutputWithPooling = self.model(**doc_input, return_dict=True)
 
         qry_token_embeddings = qry_out.last_hidden_state
+        qry_input_mask_expanded = qry_input['attention_mask'].unsqueeze(-1).expand(qry_token_embeddings.size()).float()
+        qry_token_embeddings = qry_token_embeddings * qry_input_mask_expanded
         qry_cls = self.linear(qry_token_embeddings)
         qry_cls = torch.nn.functional.normalize(qry_cls, p=2, dim=2)
 
         doc_token_embeddings = doc_out.last_hidden_state
+        doc_input_mask_expanded = doc_input['attention_mask'].unsqueeze(-1).expand(doc_token_embeddings.size()).float()
+        doc_token_embeddings = doc_token_embeddings * doc_input_mask_expanded
         doc_cls = self.linear(doc_token_embeddings)
         doc_cls = torch.nn.functional.normalize(doc_cls, p=2, dim=2)
 
