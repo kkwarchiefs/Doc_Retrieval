@@ -391,7 +391,7 @@ env CUDA_VISIBLE_DEVICES=2,3,4,5,6,7 python3 -m torch.distributed.launch --nproc
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim64_exact_mktable_masking
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim64_exact_mktable
 init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad_msmarco_exact_table/
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair_msmarco_5k_exact_2k_table.tsv
