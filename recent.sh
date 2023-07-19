@@ -1,4 +1,4 @@
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim64_exact
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim64_exact_0719
 init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad_msmarco_exact/
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair_msmarco_5k_exact.tsv
