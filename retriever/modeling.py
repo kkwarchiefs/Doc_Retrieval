@@ -311,18 +311,18 @@ class RetrieverQAPooling(nn.Module):
 
         qry_token_embeddings =  qry_out.last_hidden_state  # First element of model_output contains all token embeddings
         qry_input_mask_expanded = qry_input['attention_mask'].unsqueeze(-1).expand(qry_token_embeddings.size()).float()
-        qry_cls = torch.sum(qry_token_embeddings * qry_input_mask_expanded, 1) / torch.clamp(qry_input_mask_expanded.sum(1), min=1e-9)
+        qry_pooling = torch.sum(qry_token_embeddings * qry_input_mask_expanded, 1) / torch.clamp(qry_input_mask_expanded.sum(1), min=1e-9)
 
         doc_token_embeddings = doc_out.last_hidden_state
         doc_input_mask_expanded = doc_input['attention_mask'].unsqueeze(-1).expand(doc_token_embeddings.size()).float()
-        doc_cls = torch.sum(doc_token_embeddings * doc_input_mask_expanded, 1) / torch.clamp(doc_input_mask_expanded.sum(1), min=1e-9)
+        doc_pooling = torch.sum(doc_token_embeddings * doc_input_mask_expanded, 1) / torch.clamp(doc_input_mask_expanded.sum(1), min=1e-9)
 
         if not self.training:
-            score_ir = torch.sum(qry_cls * doc_cls, dim=-1)
+            score_ir = torch.sum(qry_pooling * doc_pooling, dim=-1)
             return score_ir
         else:
 
-            scores = torch.matmul(qry_cls, doc_cls.transpose(1, 0))  # Q * D
+            scores = torch.matmul(qry_pooling, doc_pooling.transpose(1, 0))  # Q * D
             index = torch.arange(
                 scores.size(0),
                 device=doc_input['input_ids'].device,
