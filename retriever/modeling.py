@@ -373,23 +373,23 @@ class ColBert(nn.Module):
         doc_out: BaseModelOutputWithPooling = self.model(**doc_input, return_dict=True)
 
         qry_token_embeddings = qry_out.last_hidden_state
-        qry_cls = self.linear(qry_token_embeddings)
+        qry_token = self.linear(qry_token_embeddings)
         # qry_input_mask_expanded = qry_input['attention_mask'].unsqueeze(2).float()
         # qry_cls = qry_cls * qry_input_mask_expanded
-        qry_cls = torch.nn.functional.normalize(qry_cls, p=2, dim=2)
+        qry_token = torch.nn.functional.normalize(qry_token, p=2, dim=2)
 
         doc_token_embeddings = doc_out.last_hidden_state
-        doc_cls = self.linear(doc_token_embeddings)
+        doc_token = self.linear(doc_token_embeddings)
         # doc_input_mask_expanded = doc_input['attention_mask'].unsqueeze(2).float()
         # doc_cls = doc_cls * doc_input_mask_expanded
-        doc_cls = torch.nn.functional.normalize(doc_cls, p=2, dim=2)
+        doc_token = torch.nn.functional.normalize(doc_token, p=2, dim=2)
 
         if not self.training:
-            score_ir = (qry_cls @ doc_cls.permute(0, 2, 1)).max(2).values.sum(1)
+            score_ir = (qry_token @ doc_token.permute(0, 2, 1)).max(2).values.sum(1)
             return score_ir
         else:
-            qry_cls = qry_cls.unsqueeze(1)
-            doc_cls = doc_cls.unsqueeze(0)
+            qry_cls = qry_token.unsqueeze(1)
+            doc_cls = doc_token.unsqueeze(0)
             scores = (qry_cls @ doc_cls.permute(0, 1, 3, 2)).max(3).values.sum(2)
             index = torch.arange(
                 scores.size(0),
