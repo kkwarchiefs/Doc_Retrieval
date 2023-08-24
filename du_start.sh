@@ -6,13 +6,6 @@ cd /cfs/cfs-i125txtf/jamsluo/ft_local/apex-master
 pip install -v --disable-pip-version-check --no-cache-dir ./
 env CUDA_VISIBLE_DEVICES=0
 
-270.0
-214.0
-299.0
-322.0
-472.0
-729.0
-
 output_dir=/search/ai/jamsluo/passage_rank/du_task_output/tmp4
 init_dir=/search/ai/pretrain_models/chinese-roberta-wwm-ext-large/
 passage_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/passage_idx.pkl
