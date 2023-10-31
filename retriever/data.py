@@ -322,7 +322,8 @@ class GroupedTrainPure(Dataset):
             'text',
             data_files=path_to_tsv,
         )['train']
-
+        self.nlp_dataset = self.nlp_dataset.shuffle()
+        self.nlp_dataset = self.nlp_dataset.flatten_indices()
         self.tok = tokenizer
         self.args = args
         self.args.train_group_size = 2

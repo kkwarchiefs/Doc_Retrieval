@@ -112,7 +112,7 @@ def main():
         use_fast=False,
     )
 
-    _model_class = ColBert #RetrieverQAPooling  # COILSentence
+    _model_class = ColBertWorld #RetrieverQAPooling  # COILSentence
     _trainer_class = RerankerRetrival
     _train_class = GroupedTrainPure
     _eval_class = PredictionPure
@@ -189,24 +189,24 @@ def main():
     else:
         pass
 
-    if training_args.do_train and trainer.is_world_process_zero():
-        print(config)
-        print(model_args)
-        print(data_args)
-        print(training_args)
-        qry, doc = train_dataset[random.choice(range(train_dataset.__len__()))][:2]
-        input_ids = qry['input_ids']
-        print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
-        input_ids = doc[0]['input_ids']
-        print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
-        print(qry, doc)
-        print('eval datasets')
-        qry, doc = eval_dataset[random.choice(range(eval_dataset.__len__()))]
-        input_ids = qry['input_ids']
-        print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
-        input_ids = doc['input_ids']
-        print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
-        print(qry, doc)
+    # if training_args.do_train and trainer.is_world_process_zero():
+    #     print(config)
+    #     print(model_args)
+    #     print(data_args)
+    #     print(training_args)
+    #     qry, doc = train_dataset[random.choice(range(train_dataset.__len__()))][:2]
+    #     input_ids = qry['input_ids']
+    #     print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
+    #     input_ids = doc[0]['input_ids']
+    #     print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
+    #     print(qry, doc)
+    #     print('eval datasets')
+    #     qry, doc = eval_dataset[random.choice(range(eval_dataset.__len__()))]
+    #     input_ids = qry['input_ids']
+    #     print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
+    #     input_ids = doc['input_ids']
+    #     print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
+    #     print(qry, doc)
     # Training
     if training_args.do_train:
         # add 对抗训练

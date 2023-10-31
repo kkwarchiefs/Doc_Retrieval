@@ -401,6 +401,90 @@ class ColBert(nn.Module):
             loss = self.cross_entropy(scores, index)
             return loss, loss
 
+class ColBertWorld(nn.Module):
+    def __init__(self, model: PreTrainedModel, model_args: ModelArguments, data_args: DataArguments,
+                 train_args: TrainingArguments, config):
+        super().__init__()
+        self.model: PreTrainedModel = model
+        self.cross_entropy = nn.CrossEntropyLoss(reduction='mean')
+        self.data_args, self.model_args, self.train_args = data_args, model_args, train_args
+        self.linear = nn.Linear(config.hidden_size, 64, bias=False)
+
+    @classmethod
+    def from_pretrained(
+            cls, model_args: ModelArguments, data_args: DataArguments, train_args: TrainingArguments,
+            *args, **kwargs
+    ):
+        hf_model = AutoModel.from_pretrained(*args, **kwargs)
+        model = cls(hf_model, model_args, data_args, train_args, kwargs['config'])
+        return model
+
+    def save_pretrained(self, output_dir: str):
+        path = os.path.join(output_dir, "pytorch_model.bin")
+        model_to_save = self.module if hasattr(self, "module") else self
+        torch.save(model_to_save.state_dict(), path)
+        self.model.config.save_pretrained(output_dir)
+
+    def _gather_tensor(self, t: Tensor):
+        all_tensors = [torch.empty_like(t) for _ in range(dist.get_world_size())]
+        dist.all_gather(all_tensors, t)
+        all_tensors[self.train_args.local_rank] = t
+        return all_tensors
+
+    def gather_tensors(self, *tt: Tensor):
+        tt = [torch.cat(self._gather_tensor(t)) for t in tt]
+        return tt
+
+    def forward(self, qry_input: Dict, doc_input: Dict):
+        group_size = self.data_args.train_group_size
+        if 'label' in doc_input:
+            labels = doc_input.pop('label').to(self.model.device)
+        qry_input['input_ids'] = qry_input['input_ids'].to(self.model.device)
+        if 'token_type_ids' in qry_input:
+            qry_input['token_type_ids'] = qry_input['token_type_ids'].to(self.model.device)
+        qry_input['attention_mask'] = qry_input['attention_mask'].to(self.model.device)
+        doc_input['input_ids'] = doc_input['input_ids'].to(self.model.device)
+        if 'token_type_ids' in doc_input:
+            doc_input['token_type_ids'] = doc_input['token_type_ids'].to(self.model.device)
+        doc_input['attention_mask'] = doc_input['attention_mask'].to(self.model.device)
+        qry_out: BaseModelOutputWithPooling = self.model(**qry_input, return_dict=True)
+        doc_out: BaseModelOutputWithPooling = self.model(**doc_input, return_dict=True)
+
+        qry_token_embeddings = qry_out.last_hidden_state
+        qry_token = self.linear(qry_token_embeddings)
+        # qry_input_mask_expanded = qry_input['attention_mask'].unsqueeze(2).float()
+        # qry_cls = qry_cls * qry_input_mask_expanded
+        # qry_token = torch.nn.functional.normalize(qry_token, p=2, dim=2)
+
+        doc_token_embeddings = doc_out.last_hidden_state
+        doc_token = self.linear(doc_token_embeddings)
+        # doc_input_mask_expanded = doc_input['attention_mask'].unsqueeze(2).float()
+        # doc_cls = doc_cls * doc_input_mask_expanded
+        # doc_token = torch.nn.functional.normalize(doc_token, p=2, dim=2)
+
+
+
+        if not self.training:
+
+            score_ir = (qry_token @ doc_token.permute(0, 2, 1)).max(2).values.sum(1)
+            return score_ir
+        else:
+            qry_token = self.gather_tensors(qry_token)[0]
+            doc_token = self.gather_tensors(doc_token)[0]
+            qry_cls = qry_token.unsqueeze(1)
+            doc_cls = doc_token.unsqueeze(0)
+            # print(qry_token.shape, doc_token.shape)
+            scores = (qry_cls @ doc_cls.permute(0, 1, 3, 2)).max(3).values.sum(2)
+            index = torch.arange(
+                scores.size(0),
+                device=doc_input['input_ids'].device,
+                dtype=torch.long
+            )
+            # offset the labels
+            index = index * self.data_args.train_group_size
+            loss = self.cross_entropy(scores, index)
+            return loss, loss
+
 
 class RetrieverMean(nn.Module):
     def __init__(self, model: PreTrainedModel, model_args: ModelArguments, data_args: DataArguments,
