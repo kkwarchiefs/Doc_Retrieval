@@ -32,7 +32,7 @@ class QryDocCollator(DataCollatorWithPadding):
     and pass batch separately to the actual collator.
     Abstract out data detail for the model.
     """
-    max_q_len: int = 128
+    max_q_len: int = 64
     max_d_len: int = 512
 
     def __call__(
@@ -44,19 +44,17 @@ class QryDocCollator(DataCollatorWithPadding):
             dd = sum(dd, [])
         q_collated = self.tokenizer.pad(
             qq,
-            padding='max_length',
-            max_length=self.max_q_len,
+            padding=True,
             return_tensors="pt",
         )
         d_collated = self.tokenizer.pad(
             dd,
-            padding='max_length',
-            max_length=self.max_d_len,
+            padding=True,
             return_tensors="pt",
         )
 
         return {'qry_input': q_collated, 'doc_input': d_collated}
-os.environ["WANDB_DISABLED"] = "true"
+# os.environ["WANDB_DISABLED"] = "true"
 
 
 def main():

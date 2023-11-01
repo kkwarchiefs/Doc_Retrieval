@@ -335,7 +335,7 @@ class GroupedTrainPure(Dataset):
         return self.total_len
 
     def create_one_example(self, doc_encoding: str, max_len:int):
-        item = self.tok.encode_plus(
+        item = self.tok(
             doc_encoding.strip(),
             truncation=True,
             max_length=max_len,
@@ -407,7 +407,7 @@ class PredictionPure(Dataset):
         return len(self.nlp_dataset)
 
     def create_one_example(self, doc_encoding: str, max_len: int):
-        item = self.tok.encode_plus(
+        item = self.tok(
             doc_encoding.strip(),
             truncation=True,
             max_length=max_len,
