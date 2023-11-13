@@ -384,58 +384,91 @@ python3 -m torch.distributed.launch --nproc_per_node 8 retrival_squad_colbert.py
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 
-
-
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim64_exact_pdf8k_world_norm_mask_paper
-init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_polylm_squad_colbert_dim64_exact_pdf8k_world_paper_norm
+init_dir=/search/ai/pretrain_models/polylm-1.7b/
 train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad_msmarco_exact_pdf_paper/
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair_msmarco_5k_exact.tsv
-python3 -m torch.distributed.launch --nproc_per_node 8 retrival_squad_colbert.py \
+deepspeed_config_file=ds_z2_config.json
+torchrun --nnodes 1 --nproc_per_node 8 retrival_squad_colbert.py \
   --output_dir $output_dir \
+  --deepspeed $deepspeed_config_file \
   --model_name_or_path  $init_dir \
   --logging_steps 10 \
   --do_train \
   --save_strategy epoch \
   --train_dir $train_data_dir \
-  --q_max_len 64 \
+  --q_max_len 24 \
   --p_max_len 512 \
   --seed 66 \
-  --per_device_train_batch_size 30 \
+  --bf16 \
+  --per_device_train_batch_size 13 \
+  --train_group_size 2 \
+  --per_device_eval_batch_size 32 \
+  --warmup_ratio 0.1 \
+  --weight_decay 0.01 \
+  --learning_rate 2e-5 \
+  --num_train_epochs 3 \
+  --overwrite_output_dir \
+  --dataloader_num_workers 4 \
+  --evaluation_strategy epoch \
+  --pred_path $pred_path
+
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim64_exact_pdf8k_world_paper_norm_mask_v4
+init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
+train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad_msmarco_exact_pdf_paper/
+pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair_msmarco_5k_exact.tsv
+deepspeed_config_file=ds_z2_config.json
+torchrun --nnodes 1 --nproc_per_node 8  retrival_squad_colbert.py \
+  --output_dir $output_dir \
+  --deepspeed $deepspeed_config_file \
+  --model_name_or_path  $init_dir \
+  --logging_steps 10 \
+  --do_train \
+  --save_strategy epoch \
+  --train_dir $train_data_dir \
+  --q_max_len 32 \
+  --p_max_len 512 \
+  --seed 66 \
+  --bf16 \
+  --per_device_train_batch_size 32 \
   --train_group_size 2 \
   --per_device_eval_batch_size 128 \
   --warmup_ratio 0.1 \
   --weight_decay 0.01 \
   --learning_rate 2e-5 \
-  --num_train_epochs 5 \
+  --num_train_epochs 3 \
   --overwrite_output_dir \
-  --dataloader_num_workers 2 \
+  --dataloader_num_workers 4 \
   --evaluation_strategy epoch \
   --pred_path $pred_path \
   --use_legacy_prediction_loop
 
-output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_multi_squad_colbert_dim64_gpt8k_pdf8k_world_paper
+output_dir=/search/ai/jamsluo/passage_rank/du_task_output/passage_temp
 init_dir=/search/ai/pretrain_models/paraphrase-multilingual-mpnet-base-v2/
-train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_squad_msmarco_pdf_paper/
+train_data_dir=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/train_temp
 pred_path=/search/ai/jamsluo/passage_rank/DuReader-Retrieval-Baseline/formate_data/dev/dev_squad_pair_msmarco_5k_exact.tsv
-python3 -m torch.distributed.launch --nproc_per_node 8 retrival_squad_colbert.py \
+deepspeed_config_file=ds_z2_config.json
+torchrun --nnodes 1 --nproc_per_node 2  retrival_squad_colbert.py \
   --output_dir $output_dir \
+  --deepspeed $deepspeed_config_file \
   --model_name_or_path  $init_dir \
   --logging_steps 10 \
   --do_train \
   --save_strategy epoch \
   --train_dir $train_data_dir \
-  --q_max_len 64 \
+  --q_max_len 32 \
   --p_max_len 512 \
   --seed 66 \
-  --per_device_train_batch_size 22 \
+  --bf16 \
+  --per_device_train_batch_size 32 \
   --train_group_size 2 \
   --per_device_eval_batch_size 128 \
   --warmup_ratio 0.1 \
   --weight_decay 0.01 \
-  --learning_rate 5e-5 \
-  --num_train_epochs 5 \
+  --learning_rate 2e-5 \
+  --num_train_epochs 3 \
   --overwrite_output_dir \
-  --dataloader_num_workers 2 \
+  --dataloader_num_workers 4 \
   --evaluation_strategy epoch \
   --pred_path $pred_path \
   --use_legacy_prediction_loop

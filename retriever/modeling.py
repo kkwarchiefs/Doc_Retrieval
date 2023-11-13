@@ -359,6 +359,7 @@ class ColBert(nn.Module):
 
     def forward(self, qry_input: Dict, doc_input: Dict):
         group_size = self.data_args.train_group_size
+        # print(qry_input)
         if 'label' in doc_input:
             labels = doc_input.pop('label').to(self.model.device)
         qry_input['input_ids'] = qry_input['input_ids'].to(self.model.device)
@@ -370,6 +371,7 @@ class ColBert(nn.Module):
             doc_input['token_type_ids'] = doc_input['token_type_ids'].to(self.model.device)
         doc_input['attention_mask'] = doc_input['attention_mask'].to(self.model.device)
         qry_out: BaseModelOutputWithPooling = self.model(**qry_input, return_dict=True)
+
         doc_out: BaseModelOutputWithPooling = self.model(**doc_input, return_dict=True)
 
         qry_token_embeddings = qry_out.last_hidden_state
@@ -453,20 +455,19 @@ class ColBertWorld(nn.Module):
 
         qry_token_embeddings = qry_out.last_hidden_state
         qry_token = self.linear(qry_token_embeddings)
-        qry_input_mask_expanded = qry_input['attention_mask'].unsqueeze(2).float()
-        qry_token = qry_token * qry_input_mask_expanded
+        # qry_input_mask_expanded = qry_input['attention_mask'].unsqueeze(2).float()
+        # qry_token = qry_token * qry_input_mask_expanded
         qry_token = torch.nn.functional.normalize(qry_token, p=2, dim=2)
 
         doc_token_embeddings = doc_out.last_hidden_state
         doc_token = self.linear(doc_token_embeddings)
-        doc_input_mask_expanded = doc_input['attention_mask'].unsqueeze(2).float()
-        doc_token = doc_token * doc_input_mask_expanded
+        # doc_input_mask_expanded = doc_input['attention_mask'].unsqueeze(2).float()
+        # doc_token = doc_token * doc_input_mask_expanded
         doc_token = torch.nn.functional.normalize(doc_token, p=2, dim=2)
 
 
 
         if not self.training:
-
             score_ir = (qry_token @ doc_token.permute(0, 2, 1)).max(2).values.sum(1)
             return score_ir
         else:
@@ -474,7 +475,6 @@ class ColBertWorld(nn.Module):
             doc_token = self.gather_tensors(doc_token)[0]
             qry_cls = qry_token.unsqueeze(1)
             doc_cls = doc_token.unsqueeze(0)
-            # print(qry_token.shape, doc_token.shape)
             scores = (qry_cls @ doc_cls.permute(0, 1, 3, 2)).max(3).values.sum(2)
             index = torch.arange(
                 scores.size(0),

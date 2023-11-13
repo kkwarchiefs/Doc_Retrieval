@@ -23,7 +23,7 @@ import time
 import numpy as np
 import pickle
 import tqdm
-
+os.environ["WANDB_DISABLED"] = "true"
 
 @dataclass
 class QryDocCollator(DataCollatorWithPadding):
@@ -32,7 +32,7 @@ class QryDocCollator(DataCollatorWithPadding):
     and pass batch separately to the actual collator.
     Abstract out data detail for the model.
     """
-    max_q_len: int = 64
+    max_q_len: int = 32
     max_d_len: int = 512
 
     def __call__(
@@ -44,12 +44,14 @@ class QryDocCollator(DataCollatorWithPadding):
             dd = sum(dd, [])
         q_collated = self.tokenizer.pad(
             qq,
-            padding=True,
+            padding='max_length',
+            max_length=self.max_q_len,
             return_tensors="pt",
         )
         d_collated = self.tokenizer.pad(
             dd,
-            padding=True,
+            padding='max_length',
+            max_length=self.max_d_len,
             return_tensors="pt",
         )
 
@@ -105,10 +107,13 @@ def main():
         cache_dir=model_args.cache_dir,
     )
     tokenizer = AutoTokenizer.from_pretrained(
-        model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path,
-        cache_dir=model_args.cache_dir,
-        use_fast=False,
+        model_args.tokenizer_name if model_args.tokenizer_name else model_args.model_name_or_path, legacy=False, use_fast=False
+        # cache_dir=model_args.cache_dir,
+        # use_fast=False,
     )
+    if config.model_type == "gpt2":
+        tokenizer.pad_token = tokenizer.eos_token
+        tokenizer.pad_token_id = tokenizer.eos_token_id
 
     _model_class = ColBertWorld #RetrieverQAPooling  # COILSentence
     _trainer_class = RerankerRetrival
