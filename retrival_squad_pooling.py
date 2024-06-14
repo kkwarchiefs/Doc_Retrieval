@@ -32,7 +32,7 @@ class QryDocCollator(DataCollatorWithPadding):
     and pass batch separately to the actual collator.
     Abstract out data detail for the model.
     """
-    max_q_len: int = 128
+    max_q_len: int = 64
     max_d_len: int = 512
 
     def __call__(
@@ -189,26 +189,24 @@ def main():
     else:
         pass
 
-    if training_args.do_train and trainer.is_world_process_zero():
-        print(config)
-        print(model_args)
-        print(data_args)
-        print(training_args)
-        print("train_dataset length", train_dataset.__len__())
-        qry, doc = train_dataset[random.choice(range(train_dataset.__len__()))][:2]
-        input_ids = qry['input_ids']
-        print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
-        input_ids = doc[0]['input_ids']
-        print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
-        print(qry, doc)
-        print('eval datasets')
-        print("train_dataset length", eval_dataset.__len__())
-        qry, doc = eval_dataset[random.choice(range(eval_dataset.__len__()))]
-        input_ids = qry['input_ids']
-        print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
-        input_ids = doc['input_ids']
-        print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
-        print(qry, doc)
+    # if training_args.do_train and trainer.is_world_process_zero():
+    #     print(config)
+    #     print(model_args)
+    #     print(data_args)
+    #     print(training_args)
+    #     qry, doc = train_dataset[random.choice(range(train_dataset.__len__()))][:2]
+    #     input_ids = qry['input_ids']
+    #     print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
+    #     input_ids = doc[0]['input_ids']
+    #     print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
+    #     print(qry, doc)
+    #     print('eval datasets')
+    #     qry, doc = eval_dataset[random.choice(range(eval_dataset.__len__()))]
+    #     input_ids = qry['input_ids']
+    #     print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
+    #     input_ids = doc['input_ids']
+    #     print(' '.join(tokenizer.convert_ids_to_tokens(input_ids)))
+    #     print(qry, doc)
     # Training
     if training_args.do_train:
         # add 对抗训练
